@@ -1,0 +1,22 @@
+<div class="flex min-h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <app-admin-sidebar class="w-64 bg-gray-800 text-white fixed h-full left-0 top-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out"
+                     [class.translate-x-0]="sidebarOpen"></app-admin-sidebar>
+
+  <!-- Overlay for mobile -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+       *ngIf="sidebarOpen"
+       (click)="toggleSidebar()"></div>
+
+  <!-- Main content -->
+  <div class="flex-1 lg:ml-64 flex flex-col">
+    <!-- Top navbar -->
+    <app-admin-navbar class="bg-white border-b border-gray-200 h-16 sticky top-0 z-30"
+                      (toggleSidebar)="toggleSidebar()"></app-admin-navbar>
+
+    <!-- Content area -->
+    <div class="flex-1 p-4 lg:p-6">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

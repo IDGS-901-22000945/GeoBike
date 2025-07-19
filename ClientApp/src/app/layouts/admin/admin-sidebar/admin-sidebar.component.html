@@ -1,0 +1,45 @@
+<div class="h-full">
+  <div class="p-6 border-b border-gray-700 text-center">
+    <h4 class="text-xl font-semibold text-white">GeoBike</h4>
+  </div>
+
+
+  <nav class="py-6">
+    <ul class="space-y-1">
+      <li>
+        <a routerLink="/admin"
+           routerLinkActive="bg-blue-600 text-white"
+           [routerLinkActiveOptions]="{exact: true}"
+           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+          <span class="mr-3 text-lg">📊</span>
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/empleados"
+           routerLinkActive="bg-blue-600 text-white"
+           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+          <span class="mr-3 text-lg">👥</span>
+          Usuarios
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/servicios"
+           routerLinkActive="bg-blue-600 text-white"
+           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+          <span class="mr-3 text-lg">📦</span>
+          Productos
+        </a>
+      </li>
+       <li>
+        <a routerLink="/admin/servicios"
+           routerLinkActive="bg-blue-600 text-white"
+           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+          <span class="mr-3 text-lg">📦</span>
+          Ventas
+        </a>
+      </li>
+      <!-- Aquí se agregan más  -->
+    </ul>
+  </nav>
+</div>

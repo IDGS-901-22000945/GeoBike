@@ -1,7 +1,19 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layouts/public/layout/layout.component';
+import { AdminComponent } from './pages/admin/admin.component';
+
+import { HomeComponent } from './pages/public/home/home.component';
+import { AboutComponent } from './pages/public/about/about.component';
+import { ProductosComponent } from './pages/public/productos/productos.component';
 
 export const routes: Routes = [
+  // --- Sección de Administración ---
+  {
+    path: 'admin',
+    component: AdminComponent,
+    title: 'Panel de Administración'
+  },
+
   // --- Sección Pública ---
   {
     path: '',
@@ -9,22 +21,21 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
+        component: HomeComponent,
         title: 'GeoBike Shield'
       },
       {
         path: 'nosotros',
-        loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent),
+        component: AboutComponent,
         title: 'Nosotros'
       },
       {
         path: 'productos',
-        loadComponent: () => import('./pages/productos/productos.component').then(m => m.ProductosComponent),
+        component: ProductosComponent,
         title: 'Productos'
       }
     ]
   },
 
-  // --- Ruta comodín (404) ---
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

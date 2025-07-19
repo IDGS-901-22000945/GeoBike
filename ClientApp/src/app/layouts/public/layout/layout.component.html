@@ -1,5 +1,7 @@
-<app-header></app-header>
-<main class="pt-[6rem]">
-  <router-outlet></router-outlet>
-</main>
-
+<div class="min-h-screen flex flex-col overflow-x-hidden">
+  <app-header></app-header>
+  <main class="flex-grow">
+    <router-outlet></router-outlet>
+  </main>
+  <app-footer class="mt-auto"></app-footer>
+</div>
