@@ -4,10 +4,15 @@
       <i class="fas fa-satellite-dish text-blue-500 mr-2"></i>
       <span>GeoBike Shield</span>
     </a>
-    <ul class="flex space-x-6">
-      <li><a routerLink="/" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Inicia Sesión</a></li>
-      <li><a routerLink="/nosotros" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Nosotros</a></li>
-      <li><a routerLink="/productos" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Productos</a></li>
-    </ul>
+    <div class="flex items-center space-x-6">
+      <ul class="flex space-x-6">
+        <li><a routerLink="/login" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Inicia Sesión</a></li>
+        <li><a routerLink="/nosotros" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Nosotros</a></li>
+        <li><a routerLink="/productos" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Productos</a></li>
+      </ul>
+      <a routerLink="/carrito" class="text-gray-700 hover:text-blue-600 transition-colors">
+        <i class="fas fa-shopping-cart text-xl"></i>
+      </a>
+    </div>
   </div>
 </nav>

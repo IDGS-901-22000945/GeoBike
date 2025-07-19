@@ -5,6 +5,8 @@ import { AdminComponent } from './pages/admin/admin.component';
 import { HomeComponent } from './pages/public/home/home.component';
 import { AboutComponent } from './pages/public/about/about.component';
 import { ProductosComponent } from './pages/public/productos/productos.component';
+import { LoginComponent } from './pages/public/login/login.component';
+import { CarritoComponent } from './pages/public/carrito/carrito.component';
 
 export const routes: Routes = [
   // --- Sección de Administración ---
@@ -33,6 +35,16 @@ export const routes: Routes = [
         path: 'productos',
         component: ProductosComponent,
         title: 'Productos'
+      },
+      {
+        path: 'login',
+        component: LoginComponent,
+        title: 'Login'
+      },
+      {
+        path: 'carrito',
+        component: CarritoComponent,
+        title: 'Carrito'
       }
     ]
   },
