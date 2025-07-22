@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule, RouterOutlet } from '@angular/router';
 import { AdminSidebarComponent } from '../admin-sidebar/admin-sidebar.component';
 import { AdminNavbarComponent } from '../admin-navbar/admin-navbar.component';
 
@@ -8,6 +9,8 @@ import { AdminNavbarComponent } from '../admin-navbar/admin-navbar.component';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule, // Necesario para routerLink y directivas de router
+    RouterOutlet, // Necesario para <router-outlet>
     AdminSidebarComponent,
     AdminNavbarComponent
   ],

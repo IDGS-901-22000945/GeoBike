@@ -14,9 +14,9 @@
     <app-admin-navbar class="bg-white border-b border-gray-200 h-16 sticky top-0 z-30"
                       (toggleSidebar)="toggleSidebar()"></app-admin-navbar>
 
-    <!-- Content area -->
+    <!-- Content area - CAMBIA ng-content POR router-outlet -->
     <div class="flex-1 p-4 lg:p-6">
-      <ng-content></ng-content>
+      <router-outlet></router-outlet>
     </div>
   </div>
 </div>

@@ -1,45 +1,61 @@
-<div class="h-full">
-  <div class="p-6 border-b border-gray-700 text-center">
-    <h4 class="text-xl font-semibold text-white">GeoBike</h4>
+<div class="h-full bg-gray-800 shadow-md w-64 fixed">
+  <!-- Encabezado compacto -->
+  <div class="p-4 border-b border-gray-700 text-center">
+    <h4 class="text-lg font-semibold text-white truncate">GeoBike</h4>
   </div>
 
-
-  <nav class="py-6">
-    <ul class="space-y-1">
+  <!-- Menú compacto -->
+  <nav class="py-4">
+    <ul class="space-y-0.5">
       <li>
         <a routerLink="/admin"
            routerLinkActive="bg-blue-600 text-white"
            [routerLinkActiveOptions]="{exact: true}"
-           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
-          <span class="mr-3 text-lg">📊</span>
-          Dashboard
+           class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150">
+          <span class="mr-2 w-5 text-center">📊</span>
+          <span class="truncate">Dashboard</span>
         </a>
       </li>
       <li>
         <a routerLink="/admin/empleados"
            routerLinkActive="bg-blue-600 text-white"
-           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
-          <span class="mr-3 text-lg">👥</span>
-          Empleados
+           class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150">
+          <span class="mr-2 w-5 text-center">👥</span>
+          <span class="truncate">Empleados</span>
         </a>
       </li>
       <li>
-        <a routerLink="/admin/servicios"
+        <a routerLink="/admin/proveedores"
            routerLinkActive="bg-blue-600 text-white"
-           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
-          <span class="mr-3 text-lg">📦</span>
-          Productos
+           class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150">
+          <span class="mr-2 w-5 text-center">🏭</span>
+          <span class="truncate">Proveedores</span>
         </a>
       </li>
-       <li>
-        <a routerLink="/admin/servicios"
+      <li>
+        <a routerLink="/admin/productos"
            routerLinkActive="bg-blue-600 text-white"
-           class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
-          <span class="mr-3 text-lg">📦</span>
-          Ventas
+           class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150">
+          <span class="mr-2 w-5 text-center">📦</span>
+          <span class="truncate">Productos</span>
         </a>
       </li>
-      <!-- Aquí se agregan más  -->
+      <li>
+        <a routerLink="/admin/ventas"
+           routerLinkActive="bg-blue-600 text-white"
+           class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150">
+          <span class="mr-2 w-5 text-center">💰</span>
+          <span class="truncate">Ventas</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/registros-clientes"
+           routerLinkActive="bg-blue-600 text-white"
+           class="flex items-center px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150">
+          <span class="mr-2 w-5 text-center">👤</span>
+          <span class="truncate">Registros de Clientes</span>
+        </a>
+      </li>
     </ul>
   </nav>
 </div>

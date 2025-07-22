@@ -1,0 +1,336 @@
+<div class="pt-16 md:pt-20 min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-2xl w-full space-y-8">
+    <!-- Header del Registro -->
+    <div class="text-center">
+      <!-- Logo -->
+      <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 p-2">
+        <img
+          src="assets/img/geobike.png"
+          alt="GeoBike Shield Logo"
+          class="h-10 w-10 object-contain"
+        >
+      </div>
+
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">
+        Registro de Cliente
+      </h2>
+      <p class="text-gray-600">
+        Complete los datos según corresponda
+      </p>
+    </div>
+
+    <!-- Alerta de Éxito (Aparece después del registro exitoso) -->
+    <div *ngIf="showSuccessAlert" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-100 animate-slideUp">
+        <!-- Icono de éxito -->
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-check-circle text-3xl text-green-500 animate-bounce"></i>
+        </div>
+
+        <!-- Título y mensaje -->
+        <div class="text-center">
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">¡Registro Exitoso!</h3>
+          <p class="text-gray-600 mb-6 leading-relaxed">
+            Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión con tu email y contraseña.
+          </p>
+
+          <!-- Botón de acción -->
+          <button
+            (click)="goToLogin()"
+            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            Ir a Iniciar Sesión
+          </button>
+
+          <!-- Contador de redirección -->
+          <p class="text-sm text-gray-500 mt-4">
+            <i class="fas fa-clock mr-1"></i>
+            Serás redirigido automáticamente en 3 segundos
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje de Error Global -->
+    <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 animate-shake">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-circle text-red-400"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-red-700">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario de Registro -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8"
+         [class.opacity-50]="showSuccessAlert"
+         [class.pointer-events-none]="showSuccessAlert">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Fila de Nombres -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Nombre -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Nombre(s) *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-user text-gray-400"></i>
+              </div>
+              <input
+                type="text"
+                formControlName="nombre"
+                class="block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                [class.border-red-300]="f['nombre'].invalid && f['nombre'].touched"
+                [class.border-gray-300]="f['nombre'].valid || !f['nombre'].touched"
+                placeholder="Nombre(s)"
+              >
+            </div>
+            <p *ngIf="f['nombre'].invalid && f['nombre'].touched" class="mt-1 text-sm text-red-600">
+              {{ getErrorMessage('nombre') }}
+            </p>
+          </div>
+
+          <!-- Apellido Paterno -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Apellido Paterno *
+            </label>
+            <input
+              type="text"
+              formControlName="apellidoPaterno"
+              class="block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              [class.border-red-300]="f['apellidoPaterno'].invalid && f['apellidoPaterno'].touched"
+              [class.border-gray-300]="f['apellidoPaterno'].valid || !f['apellidoPaterno'].touched"
+              placeholder="Paterno"
+            >
+            <p *ngIf="f['apellidoPaterno'].invalid && f['apellidoPaterno'].touched" class="mt-1 text-sm text-red-600">
+              {{ getErrorMessage('apellidoPaterno') }}
+            </p>
+          </div>
+
+          <!-- Apellido Materno -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Apellido Materno
+            </label>
+            <input
+              type="text"
+              formControlName="apellidoMaterno"
+              class="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              placeholder="Materno"
+            >
+          </div>
+        </div>
+
+        <!-- RFC y Teléfono -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- RFC -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              RFC *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-id-card text-gray-400"></i>
+              </div>
+              <input
+                type="text"
+                formControlName="rfc"
+                maxlength="13"
+                class="block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition-all duration-200"
+                [class.border-red-300]="f['rfc'].invalid && f['rfc'].touched"
+                [class.border-gray-300]="f['rfc'].valid || !f['rfc'].touched"
+                placeholder="ABCD123456789"
+              >
+            </div>
+            <p *ngIf="f['rfc'].invalid && f['rfc'].touched" class="mt-1 text-sm text-red-600">
+              {{ getErrorMessage('rfc') }}
+            </p>
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Teléfono *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-phone text-gray-400"></i>
+              </div>
+              <input
+                type="tel"
+                formControlName="telefono"
+                maxlength="10"
+                class="block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                [class.border-red-300]="f['telefono'].invalid && f['telefono'].touched"
+                [class.border-gray-300]="f['telefono'].valid || !f['telefono'].touched"
+                placeholder="4771234567"
+              >
+            </div>
+            <p *ngIf="f['telefono'].invalid && f['telefono'].touched" class="mt-1 text-sm text-red-600">
+              {{ getErrorMessage('telefono') }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Correo Electrónico *
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-envelope text-gray-400"></i>
+            </div>
+            <input
+              type="email"
+              formControlName="email"
+              class="block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              [class.border-red-300]="f['email'].invalid && f['email'].touched"
+              [class.border-gray-300]="f['email'].valid || !f['email'].touched"
+              placeholder="tu@email.com"
+            >
+          </div>
+          <p *ngIf="f['email'].invalid && f['email'].touched" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('email') }}
+          </p>
+        </div>
+
+        <!-- Contraseñas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Contraseña -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Contraseña *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-lock text-gray-400"></i>
+              </div>
+              <input
+                type="password"
+                formControlName="password"
+                class="block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                [class.border-red-300]="f['password'].invalid && f['password'].touched"
+                [class.border-gray-300]="f['password'].valid || !f['password'].touched"
+                placeholder="Mínimo 8 caracteres"
+              >
+            </div>
+            <p *ngIf="f['password'].invalid && f['password'].touched" class="mt-1 text-sm text-red-600">
+              {{ getErrorMessage('password') }}
+            </p>
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Confirmar Contraseña *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-lock text-gray-400"></i>
+              </div>
+              <input
+                type="password"
+                formControlName="confirmPassword"
+                class="block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                [class.border-red-300]="f['confirmPassword'].invalid && f['confirmPassword'].touched"
+                [class.border-gray-300]="f['confirmPassword'].valid || !f['confirmPassword'].touched"
+                placeholder="Repite tu contraseña"
+              >
+            </div>
+            <p *ngIf="f['confirmPassword'].invalid && f['confirmPassword'].touched" class="mt-1 text-sm text-red-600">
+              {{ getErrorMessage('confirmPassword') }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Dirección *
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-map-marker-alt text-gray-400"></i>
+            </div>
+            <input
+              type="text"
+              formControlName="direccion"
+              class="block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              [class.border-red-300]="f['direccion'].invalid && f['direccion'].touched"
+              [class.border-gray-300]="f['direccion'].valid || !f['direccion'].touched"
+              placeholder="Ingrese dirección completa"
+            >
+          </div>
+          <p *ngIf="f['direccion'].invalid && f['direccion'].touched" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('direccion') }}
+          </p>
+        </div>
+
+        <!-- Botón de Registro -->
+        <div>
+          <button
+            type="submit"
+            [disabled]="isLoading || registerForm.invalid"
+            class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+          >
+            <i *ngIf="!isLoading" class="fas fa-user-plus mr-2"></i>
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+            {{ isLoading ? 'Registrando...' : 'Registrar' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- Link de login -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-600">
+          ¿Ya tienes cuenta?
+          <a routerLink="/login" class="text-blue-600 hover:text-blue-500 font-medium transition-colors duration-200">
+            Inicia sesión aquí
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.6s ease-in-out;
+}
+</style>
