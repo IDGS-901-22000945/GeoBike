@@ -39,20 +39,22 @@ namespace GeoApi.Data
 
             // Configuración de Cliente
             modelBuilder.Entity<Cliente>(entity =>
-            {
-                entity.HasKey(e => e.ClienteId);
-                entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.ApellidoPaterno).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.ApellidoMaterno).HasMaxLength(100);
-                entity.Property(e => e.DireccionEnvio).HasMaxLength(500);
-                entity.Property(e => e.Telefono).HasMaxLength(20);
+    {
+        entity.HasKey(e => e.ClienteId);
+        entity.Property(e => e.Nombre).IsRequired().HasMaxLength(100);
+        entity.Property(e => e.ApellidoPaterno).IsRequired().HasMaxLength(100);
+        entity.Property(e => e.ApellidoMaterno).HasMaxLength(100);
+        entity.Property(e => e.DireccionEnvio).HasMaxLength(500);
+        entity.Property(e => e.Telefono).HasMaxLength(20);
 
-                // Relación uno a uno con Usuario
-                entity.HasOne(c => c.Usuario)
-                    .WithOne(u => u.Cliente)
-                    .HasForeignKey<Cliente>(c => c.UsuarioId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+        // Ignora explícitamente la propiedad Estado si existe
+
+        // Relación uno a uno con Usuario
+        entity.HasOne(c => c.Usuario)
+            .WithOne(u => u.Cliente)
+            .HasForeignKey<Cliente>(c => c.UsuarioId)
+            .OnDelete(DeleteBehavior.Cascade);
+    });
 
             // Configuración de Personal
             modelBuilder.Entity<Personal>(entity =>

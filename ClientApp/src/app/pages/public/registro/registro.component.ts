@@ -27,7 +27,6 @@ export class RegistroComponent {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellidoPaterno: ['', [Validators.required, Validators.minLength(2)]],
       apellidoMaterno: [''],
-      rfc: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(13)]],
       telefono: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -81,41 +80,55 @@ export class RegistroComponent {
     }, 3000);
   }
 
-  onSubmit() {
-    if (this.registerForm.valid) {
-      this.isLoading = true;
-      this.errorMessage = '';
+onSubmit() {
+  if (this.registerForm.valid) {
+    this.isLoading = true;
+    this.errorMessage = '';
+    const formData = this.registerForm.value;
 
-      const formData = this.registerForm.value;
+    // Mapeo exacto de campos
+    const clienteData = {
+      email: formData.email,
+      password: formData.password, // Envía como password (el backend lo convertirá a hash)
+      nombre: formData.nombre,
+      apellidoPaterno: formData.apellidoPaterno,
+      apellidoMaterno: formData.apellidoMaterno || '', // Manejo de nulos
+      direccion: formData.direccion, // Nombre consistente con el formulario
+      telefono: formData.telefono
+    };
 
-      const clienteData = {
-        email: formData.email,
-        passwordHash: this.hashPassword(formData.password),
-        nombre: formData.nombre,
-        apellidoPaterno: formData.apellidoPaterno,
-        apellidoMaterno: formData.apellidoMaterno || '',
-        direccionEnvio: formData.direccion,
-        telefono: formData.telefono
-      };
+    console.log('Datos a enviar:', clienteData);
 
-      this.clienteService.registerCliente(clienteData).subscribe({
-        next: (response: any) => {
-          console.log('Cliente registrado exitosamente', response);
-          this.isLoading = false;
-          this.showSuccessAndRedirect();
-        },
-        error: (error: any) => {
-          console.error('Error en el registro:', error);
-          this.errorMessage = error.error?.message || error.message || 'Error en el registro. Intenta de nuevo.';
-          this.isLoading = false;
+    this.clienteService.registerCliente(clienteData).subscribe({
+      next: (response) => {
+        console.log('Registro exitoso:', response);
+        this.isLoading = false; // ¡IMPORTANTE! Cambiar el loading a false
+        this.showSuccessAndRedirect(); // Llamar al método que ya existe
+      },
+      error: (error) => {
+        console.error('Error completo:', error);
+        if (error.error) {
+          console.error('Detalles del error:', error.error);
+          // Extrae mensajes de error específicos
+          if (error.error.errors) {
+            this.errorMessage = Object.values(error.error.errors).flat().join(', ');
+          } else {
+            this.errorMessage = error.error.error || error.error.message || 'Error en el registro';
+          }
         }
-      });
-    } else {
-      Object.keys(this.registerForm.controls).forEach(key => {
-        this.registerForm.get(key)?.markAsTouched();
-      });
-    }
+        this.isLoading = false;
+      }
+    });
+  } else {
+    this.markAllAsTouched();
   }
+}
+
+private markAllAsTouched() {
+  Object.keys(this.registerForm.controls).forEach(key => {
+    this.registerForm.get(key)?.markAsTouched();
+  });
+}
 
   goToLogin() {
     this.router.navigate(['/login']);

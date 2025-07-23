@@ -44,6 +44,11 @@ export class RegistrosClientesComponent implements OnInit {
     this.loadClientes();
   }
 
+  alertMessage: string = '';
+  alertClass: string = '';
+  alertIcon: string = '';
+
+
   // Método helper para manejar errores
   private handleError(error: any, operation: string): void {
     console.error(`❌ Error en ${operation}:`, error);
@@ -87,23 +92,50 @@ export class RegistrosClientesComponent implements OnInit {
   }
 
   // Cargar todos los clientes
-  loadClientes(): void {
-    this.isLoading = true;
-    this.error = null;
-    console.log('🔍 Iniciando carga de clientes desde:', this.getServerUrl());
+  // Reemplaza tu método loadClientes actual con este:
+loadClientes(): void {
+  this.isLoading = true;
+  this.error = null;
+  console.log('🔍 Iniciando carga de clientes desde:', this.getServerUrl());
 
-    this.clienteService.getClientes().subscribe({
-      next: (clientes) => {
-        console.log('✅ Clientes cargados exitosamente:', clientes);
-        this.clientes = clientes;
-        this.applyFilters();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.handleError(error, 'cargar clientes');
+  this.clienteService.getClientes().subscribe({
+    next: (clientes) => {
+      console.log('✅ Clientes cargados exitosamente:', clientes);
+
+      // 🐛 DEBUG COMPLETO - Muestra TODA la estructura
+      if (clientes.length > 0) {
+        const primerCliente = clientes[0];
+        console.group('🔍 ESTRUCTURA COMPLETA DEL PRIMER CLIENTE');
+        console.log('📋 Cliente completo:', primerCliente);
+        console.log('🔑 Todas las propiedades:', Object.keys(primerCliente));
+
+        // Buscar email en todas las propiedades posibles
+        console.log('📧 Búsqueda de EMAIL:');
+        console.log('  - email:', (primerCliente as any).email);
+        console.log('  - usuario?.email:', primerCliente.usuario?.email);
+
+        // Buscar estado en todas las propiedades posibles
+        console.log('🎯 Búsqueda de ESTADO:');
+        console.log('  - activo:', (primerCliente as any).activo);
+        console.log('  - usuario?.activo:', primerCliente.usuario?.activo);
+
+        // Si hay usuario anidado, mostrar sus propiedades
+        if (primerCliente.usuario) {
+          console.log('👤 Usuario completo:', primerCliente.usuario);
+        }
+
+        console.groupEnd();
       }
-    });
-  }
+
+      this.clientes = clientes;
+      this.applyFilters();
+      this.isLoading = false;
+    },
+    error: (error) => {
+      this.handleError(error, 'cargar clientes');
+    }
+  });
+}
 
   onSearch(): void {
     if (this.searchTerm.trim()) {
@@ -127,40 +159,46 @@ export class RegistrosClientesComponent implements OnInit {
     }
   }
 
-  applyFilters(): void {
-    let clientesFiltrados = [...this.clientes];
+applyFilters(): void {
+  let clientesFiltrados = [...this.clientes];
 
-    if (this.filtroEstado !== 'todos') {
-      const esActivo = this.filtroEstado === 'activos';
-      clientesFiltrados = clientesFiltrados.filter(cliente =>
-        cliente.usuario?.activo === esActivo
-      );
-    }
-
-    switch (this.ordenamiento) {
-      case 'recientes':
-        clientesFiltrados.sort((a, b) =>
-          new Date(b.usuario?.FechaCreacion || '').getTime() -
-          new Date(a.usuario?.FechaCreacion || '').getTime()
-        );
-        break;
-      case 'antiguos':
-        clientesFiltrados.sort((a, b) =>
-          new Date(a.usuario?.FechaCreacion || '').getTime() -
-          new Date(b.usuario?.FechaCreacion || '').getTime()
-        );
-        break;
-      case 'nombre-az':
-        clientesFiltrados.sort((a, b) =>
-          a.nombre.localeCompare(b.nombre)
-        );
-        break;
-    }
-
-    this.clientesFiltrados = clientesFiltrados;
-    this.totalItems = clientesFiltrados.length;
-    this.currentPage = 1;
+  if (this.filtroEstado !== 'todos') {
+    const esActivo = this.filtroEstado === 'activos';
+    clientesFiltrados = clientesFiltrados.filter(cliente =>
+      (cliente as any).activo === esActivo
+    );
   }
+
+  switch (this.ordenamiento) {
+    case 'recientes':
+      clientesFiltrados.sort((a, b) =>
+        new Date((b as any).fechaCreacion || '').getTime() -
+        new Date((a as any).fechaCreacion || '').getTime()
+      );
+      break;
+    case 'antiguos':
+      clientesFiltrados.sort((a, b) =>
+        new Date((a as any).fechaCreacion || '').getTime() -
+        new Date((b as any).fechaCreacion || '').getTime()
+      );
+      break;
+    case 'nombre-az':
+      clientesFiltrados.sort((a, b) =>
+        a.nombre.localeCompare(b.nombre)
+      );
+      break;
+  }
+
+  this.clientesFiltrados = clientesFiltrados;
+  this.totalItems = clientesFiltrados.length;
+  this.currentPage = 1;
+}
+
+// ✅ TAMBIÉN AGREGA ESTA FUNCIÓN HELPER EN TU COMPONENTE:
+getClienteProperty(cliente: any, property: string): any {
+  return cliente[property];
+}
+
 
   toggleEstado(cliente: Cliente): void {
     const accion = cliente.usuario?.activo ? 'desactivar' : 'activar';
@@ -182,19 +220,19 @@ export class RegistrosClientesComponent implements OnInit {
   }
 
   // Abrir modal de edición
-  editCliente(cliente: Cliente): void {
-    this.clienteSeleccionado = cliente;
-    this.editForm = {
-      clienteId: cliente.clienteId,
-      email: cliente.usuario?.email || '',
-      nombre: cliente.nombre,
-      apellidoPaterno: cliente.apellidoPaterno,
-      apellidoMaterno: cliente.apellidoMaterno || '',
-      direccionEnvio: cliente.direccionEnvio,
-      telefono: cliente.telefono
-    };
-    this.showEditModal = true;
-  }
+editCliente(cliente: Cliente): void {
+  this.clienteSeleccionado = cliente;
+  this.editForm = {
+    clienteId: cliente.clienteId,
+    email: (cliente as any).email || '',  // ✅ CORRECTO: accede directo al email
+    nombre: cliente.nombre,
+    apellidoPaterno: cliente.apellidoPaterno,
+    apellidoMaterno: cliente.apellidoMaterno || '',
+    direccionEnvio: cliente.direccionEnvio,
+    telefono: cliente.telefono
+  };
+  this.showEditModal = true;
+}
 
   // Guardar cambios del cliente
   saveCliente(): void {

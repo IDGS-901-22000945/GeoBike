@@ -24,7 +24,6 @@ namespace GeoApi.Models
         public string ApellidoMaterno { get; set; }
         public string DireccionEnvio { get; set; }
         public string Telefono { get; set; }
-        public bool Estado { get; set; }
 
         public Usuario Usuario { get; set; }
     }

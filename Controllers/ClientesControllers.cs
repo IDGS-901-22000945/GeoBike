@@ -49,7 +49,7 @@ public async Task<ActionResult<IEnumerable<ClienteResponseDto>>> GetClientes()
             ClienteId = c.ClienteId,
             Nombre = c.Nombre,
             ApellidoPaterno = c.ApellidoPaterno,
-            ApellidoMaterno = c.ApellidoMaterno ?? "", // Manejo de nulos
+            ApellidoMaterno = c.ApellidoMaterno ?? "", 
             DireccionEnvio = c.DireccionEnvio,
             Telefono = c.Telefono,
             UsuarioId = c.UsuarioId,
@@ -65,64 +65,62 @@ public async Task<ActionResult<IEnumerable<ClienteResponseDto>>> GetClientes()
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterCliente([FromBody] ClienteRegistroModel model)
+{
+    try
+    {
+        if (!ModelState.IsValid)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                if (await _context.Usuarios.AnyAsync(u => u.Email == model.Email))
-                {
-                    return BadRequest(new { error = "El correo electrónico ya está registrado." });
-                }
-
-                var usuario = new Usuario
-                {
-                    Email = model.Email,
-                    PasswordHash = model.PasswordHash, // En una aplicación real, deberías hashear esta contraseña
-                    Rol = "cliente",
-                    FechaCreacion = DateTime.Now,
-                    Activo = true
-                };
-
-                _context.Usuarios.Add(usuario);
-                await _context.SaveChangesAsync();
-
-                var cliente = new Cliente
-                {
-                    UsuarioId = usuario.UsuarioId,
-                    Nombre = model.Nombre,
-                    ApellidoPaterno = model.ApellidoPaterno,
-                    ApellidoMaterno = model.ApellidoMaterno,
-                    DireccionEnvio = model.DireccionEnvio,
-                    Telefono = model.Telefono,
-                    Usuario = usuario // Asigna el objeto Usuario completo para la navegación
-                };
-
-                _context.Clientes.Add(cliente);
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    message = "Cliente registrado exitosamente",
-                    clienteId = cliente.ClienteId,
-                    email = usuario.Email,
-                    nombre = cliente.Nombre,
-                    activo = usuario.Activo 
-                });
-            }
-            catch (DbUpdateException ex)
-            {
-                return BadRequest(new { error = "Error al guardar en la base de datos.", details = ex.InnerException?.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = "Error interno del servidor.", details = ex.Message });
-            }
+            return BadRequest(ModelState);
         }
 
+        if (await _context.Usuarios.AnyAsync(u => u.Email == model.Email))
+        {
+            return BadRequest(new { error = "El correo electrónico ya está registrado." });
+        }
+
+        var usuario = new Usuario
+        {
+            Email = model.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password), // <-- Hashea aquí
+            Rol = "cliente",
+            FechaCreacion = DateTime.Now,
+            Activo = true
+        };
+
+        _context.Usuarios.Add(usuario);
+        await _context.SaveChangesAsync();
+
+        var cliente = new Cliente
+        {
+            UsuarioId = usuario.UsuarioId,
+            Nombre = model.Nombre,
+            ApellidoPaterno = model.ApellidoPaterno,
+            ApellidoMaterno = model.ApellidoMaterno,
+            DireccionEnvio = model.Direccion,
+            Telefono = model.Telefono,
+        };
+
+        _context.Clientes.Add(cliente);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Cliente registrado exitosamente",
+            clienteId = cliente.ClienteId,
+            email = usuario.Email,
+            nombre = cliente.Nombre,
+            activo = usuario.Activo 
+        });
+    }
+    catch (DbUpdateException ex)
+    {
+        return BadRequest(new { error = "Error al guardar en la base de datos.", details = ex.InnerException?.Message });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = "Error interno del servidor.", details = ex.Message });
+    }
+}
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Cliente>> GetCliente(int id)
@@ -259,35 +257,31 @@ public async Task<ActionResult<IEnumerable<ClienteResponseDto>>> SearchClientes(
     }
 
 
-    public class ClienteRegistroModel 
-    {
-        [Required(ErrorMessage = "El email es requerido")]
-        [EmailAddress(ErrorMessage = "El formato del email no es válido")]
-        public string Email { get; set; }
+   public class ClienteRegistroModel 
+{
+    [Required(ErrorMessage = "El email es requerido")]
+    [EmailAddress(ErrorMessage = "El formato del email no es válido")]
+    public string Email { get; set; }
 
-        [Required(ErrorMessage = "La contraseña es requerida")]
-        [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
-        public string PasswordHash { get; set; } 
+    [Required(ErrorMessage = "La contraseña es requerida")]
+    [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
+    public string Password  { get; set; } // Cambiado de PasswordHash a Password
 
-        [Required(ErrorMessage = "El nombre es requerido")]
-        [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
-        public string Nombre { get; set; }
+    [Required(ErrorMessage = "El nombre es requerido")]
+    public string Nombre { get; set; }
 
-        [Required(ErrorMessage = "El apellido paterno es requerido")]
-        [StringLength(100, ErrorMessage = "El apellido paterno no puede exceder 100 caracteres")]
-        public string ApellidoPaterno { get; set; }
+    [Required(ErrorMessage = "El apellido paterno es requerido")]
+    public string ApellidoPaterno { get; set; }
 
-        [StringLength(100, ErrorMessage = "El apellido materno no puede exceder 100 caracteres")]
-        public string ApellidoMaterno { get; set; }
+    public string ApellidoMaterno { get; set; } // Opcional
 
-        [Required(ErrorMessage = "La dirección de envío es requerida")]
-        [StringLength(500, ErrorMessage = "La dirección no puede exceder 500 caracteres")]
-        public string DireccionEnvio { get; set; }
+    [Required(ErrorMessage = "La dirección es requerida")]
+    public string Direccion { get; set; } // Cambiado de DireccionEnvio a Direccion
 
-        [Required(ErrorMessage = "El teléfono es requerido")]
-        [Phone(ErrorMessage = "El formato del teléfono no es válido")]
-        public string Telefono { get; set; }
-    }
+    [Required(ErrorMessage = "El teléfono es requerido")]
+    [Phone(ErrorMessage = "El formato del teléfono no es válido")]
+    public string Telefono { get; set; }
+}
 
     public class ClienteUpdateModel // Clase nueva que necesitas definir
     {

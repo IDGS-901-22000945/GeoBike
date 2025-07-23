@@ -1,200 +1,351 @@
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Sección del formulario (30% del ancho) -->
-            <div class="w-full lg:w-1/3">
-                <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Registro de Proveedores</h2>
+<div class="p-6 bg-white rounded-lg shadow">
+  <!-- Mensajes de alerta -->
+  <div *ngIf="alertMessage" class="mb-4 p-3 rounded-md {{alertClass}} flex items-center">
+    <span class="mr-2">{{alertIcon}}</span>
+    {{alertMessage}}
+  </div>
 
-                    <form class="space-y-4">
-                        <div>
-                            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                            <input type="text" id="nombre" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+    {{error}}
+    <button (click)="clearError()" class="float-right text-red-500 hover:text-red-700">×</button>
+  </div>
 
-                        <div>
-                            <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                            <input type="tel" id="telefono" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
+  <!-- Encabezado y buscador -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <h2 class="text-2xl font-bold text-gray-800">Gestión de Proveedores</h2>
 
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
+      <div class="relative w-full md:w-64">
+        <input
+          type="text"
+          placeholder="Buscar proveedores..."
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+          class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
 
-                        <div class="flex items-center">
-                            <input type="checkbox" id="estatus" checked class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                            <label for="estatus" class="ml-2 block text-sm text-gray-700">Activo</label>
-                        </div>
-
-                        <div class="flex space-x-3 pt-4">
-                            <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
-                                <i class="fas fa-save mr-2"></i>Guardar
-                            </button>
-                            <button type="reset" class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
-                                <i class="fas fa-undo mr-2"></i>Limpiar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Sección de la tabla (70% del ancho) -->
-            <div class="w-full lg:w-2/3">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-6 border-b">
-                        <h1 class="text-2xl font-bold text-gray-800">Administración de Proveedores</h1>
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4">
-                            <div class="relative w-full sm:w-64">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-search text-gray-400"></i>
-                                </div>
-                                <input type="search" id="search-input" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Buscar proveedor">
-                            </div>
-                            <button class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center justify-center">
-                                <i class="fas fa-file-excel mr-2"></i> Exportar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-indigo-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Nombre</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Teléfono</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Email</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-800 uppercase tracking-wider">Estatus</th>
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-indigo-800 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <!-- Proveedor 1 -->
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Proveedor Uno S.A.</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">555-123-4567</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">contactoproveedor1.com</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Activo
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex justify-center space-x-2">
-                                        <button class="text-indigo-600 hover:text-indigo-900">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-green-600 hover:text-green-900">
-                                            <i class="fas fa-power-off"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-900">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Proveedor 2 -->
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Suministros Dos</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">555-987-6543</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ventasuministros2.com</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                            Inactivo
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex justify-center space-x-2">
-                                        <button class="text-indigo-600 hover:text-indigo-900">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-green-600 hover:text-green-900">
-                                            <i class="fas fa-power-off"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-900">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Proveedor 3 -->
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Distribuidora Tres</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">555-456-7890</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">infodistribuidora3.com.mx</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Activo
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex justify-center space-x-2">
-                                        <button class="text-indigo-600 hover:text-indigo-900">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-green-600 hover:text-green-900">
-                                            <i class="fas fa-power-off"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-900">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Proveedor 4 -->
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Alimentos Cuatro</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">555-789-0123</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">contactoalimentos4.com</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Activo
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex justify-center space-x-2">
-                                        <button class="text-indigo-600 hover:text-indigo-900">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-green-600 hover:text-green-900">
-                                            <i class="fas fa-power-off"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-900">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Paginación -->
-                    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div>
-                                <p class="text-sm text-gray-700">
-                                    Mostrando <span class="font-medium">1</span> a <span class="font-medium">4</span> de <span class="font-medium">12</span> resultados
-                                </p>
-                            </div>
-                            <div>
-                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Anterior</span>
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                    <a href="#" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        1
-                                    </a>
-                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        2
-                                    </a>
-                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        3
-                                    </a>
-                                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Siguiente</span>
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <button
+        (click)="openAddModal()"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center w-full md:w-auto justify-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Nuevo Proveedor
+      </button>
     </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    <select
+      [(ngModel)]="filtroEstado"
+      (change)="applyFilters()"
+      class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="todos">Todos los estados</option>
+      <option value="activos">Activos</option>
+      <option value="inactivos">Inactivos</option>
+    </select>
+    <select
+      [(ngModel)]="ordenamiento"
+      (change)="applyFilters()"
+      class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="recientes">Recientes primero</option>
+      <option value="antiguos">Antiguos primero</option>
+      <option value="nombre-az">Nombre A-Z</option>
+    </select>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="isLoading" class="text-center py-8">
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <p class="mt-2 text-gray-600">Cargando proveedores...</p>
+  </div>
+
+  <!-- Tabla de proveedores -->
+  <div class="overflow-x-auto" *ngIf="!isLoading">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proveedor</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacto</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono/Email</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let proveedor of paginatedProveedores">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="text-sm font-medium text-gray-900">{{proveedor.nombre}}</div>
+            </div>
+            <div class="text-sm text-gray-500">ID: {{proveedor.proveedorId}}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{proveedor.contacto || 'N/A'}}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{proveedor.telefono || 'N/A'}}</div>
+            <div class="text-sm text-gray-500">{{proveedor.email || 'N/A'}}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span *ngIf="proveedor.activo"
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+              Activo
+            </span>
+            <span *ngIf="!proveedor.activo"
+                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+              Inactivo
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+  <button
+    (click)="editProveedor(proveedor)"
+    class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
+    <i class="fas fa-edit mr-1"></i>
+  </button>
+
+<button
+    *ngIf="proveedor.activo"
+    (click)="toggleEstado(proveedor)"
+    class="text-red-600 hover:text-red-900 inline-flex items-center">
+    <i class="fas fa-toggle-off mr-1"></i>
+
+  </button>
+
+  <button
+    *ngIf="!proveedor.activo"
+    (click)="toggleEstado(proveedor)"
+    class="text-green-600 hover:text-green-900 inline-flex items-center">
+    <i class="fas fa-toggle-on mr-1"></i>
+  </button>
+</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="proveedoresFiltrados.length === 0" class="text-center py-8">
+      <p class="text-gray-500">No se encontraron proveedores</p>
+      <button (click)="retry()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        Reintentar
+      </button>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <div class="flex items-center justify-between mt-6" *ngIf="!isLoading && totalItems > 0">
+    <div class="text-sm text-gray-500">
+      Mostrando {{startItem}} a {{endItem}} de {{totalItems}} proveedores
+    </div>
+    <div class="flex space-x-2">
+      <button
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+        class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+        Anterior
+      </button>
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+        class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+        Siguiente
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para agregar proveedor -->
+<div *ngIf="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Proveedor</h3>
+
+      <form [formGroup]="addForm" (ngSubmit)="saveNewProveedor()">
+        <!-- Nombre -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre*</label>
+          <input
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('nombre')?.invalid && addForm.get('nombre')?.touched">
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('nombre')?.invalid && addForm.get('nombre')?.touched">
+            {{getError('nombre', addForm)}}
+          </div>
+        </div>
+
+        <!-- Contacto -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Contacto</label>
+          <input
+            type="text"
+            formControlName="contacto"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('contacto')?.invalid && addForm.get('contacto')?.touched">
+            {{getError('contacto', addForm)}}
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono*</label>
+          <input
+            type="tel"
+            formControlName="telefono"
+            maxlength="10"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('telefono')?.invalid && addForm.get('telefono')?.touched">
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('telefono')?.invalid && addForm.get('telefono')?.touched">
+            {{getError('telefono', addForm)}}
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+          <input
+            type="email"
+            formControlName="email"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('email')?.invalid && addForm.get('email')?.touched">
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('email')?.invalid && addForm.get('email')?.touched">
+            {{getError('email', addForm)}}
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+          <textarea
+            formControlName="direccion"
+            rows="3"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('direccion')?.invalid && addForm.get('direccion')?.touched">
+            {{getError('direccion', addForm)}}
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="mb-4">
+          <label class="flex items-center">
+            <input type="checkbox" formControlName="activo" class="rounded text-blue-500 focus:ring-blue-500">
+            <span class="ml-2 text-sm text-gray-700">Activo</span>
+          </label>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            (click)="closeAddModal()"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="addForm.invalid || isLoading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <span *ngIf="!isLoading">Guardar</span>
+            <span *ngIf="isLoading">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar proveedor -->
+<div *ngIf="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Editar Proveedor</h3>
+
+      <form [formGroup]="editForm" (ngSubmit)="saveProveedor()">
+        <!-- Nombre -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre*</label>
+          <input
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('nombre')?.invalid && editForm.get('nombre')?.touched">
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('nombre')?.invalid && editForm.get('nombre')?.touched">
+            {{getError('nombre', editForm)}}
+          </div>
+        </div>
+
+        <!-- Contacto -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Contacto</label>
+          <input
+            type="text"
+            formControlName="contacto"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('contacto')?.invalid && editForm.get('contacto')?.touched">
+            {{getError('contacto', editForm)}}
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono*</label>
+          <input
+            type="tel"
+            formControlName="telefono"
+            maxlength="10"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('telefono')?.invalid && editForm.get('telefono')?.touched">
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('telefono')?.invalid && editForm.get('telefono')?.touched">
+            {{getError('telefono', editForm)}}
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+          <input
+            type="email"
+            formControlName="email"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('email')?.invalid && editForm.get('email')?.touched">
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched">
+            {{getError('email', editForm)}}
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+          <textarea
+            formControlName="direccion"
+            rows="3"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('direccion')?.invalid && editForm.get('direccion')?.touched">
+            {{getError('direccion', editForm)}}
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="editForm.invalid || isLoading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+            <span *ngIf="!isLoading">Guardar Cambios</span>
+            <span *ngIf="isLoading">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

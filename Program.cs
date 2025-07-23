@@ -7,6 +7,17 @@ using System.Text.Json.Serialization; // Agregado para ReferenceHandler y Proper
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200", "http://localhost:44473", "https://localhost:44473")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
 // Add services to the container.
 // builder.Services.AddControllersWithViews(); // Comentado o eliminado si solo usas API controllers
 
@@ -35,16 +46,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 // Configurar CORS para permitir solicitudes desde Angular
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngular", policy =>
-    {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200", "http://localhost:44473", "https://localhost:44473")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
-});
+
 
 var app = builder.Build();
 

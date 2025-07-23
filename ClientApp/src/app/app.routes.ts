@@ -12,7 +12,7 @@ import { EmpleadosComponent } from './pages/admin/empleados/empleados.component'
 import { VentasComponent } from './pages/admin/ventas/ventas.component';
 import { AdminProductosComponent } from './pages/admin/admin-productos/admin-productos.component';
 import { RegistrosClientesComponent } from './pages/admin/registros-clientes/registros-clientes.component';
-import { ProveedoresComponent } from './pages/admin/proveedores/proveedores.component';
+import { RegistrosProveedoresComponent } from './pages/admin/proveedores/proveedores.component';
 
 export const routes: Routes = [
   // --- Sección de Administración ---
@@ -32,7 +32,7 @@ export const routes: Routes = [
       },
       {
         path: 'proveedores',
-        component: ProveedoresComponent,
+        component: RegistrosProveedoresComponent,
         title: 'Proveedores'
       },
       {
