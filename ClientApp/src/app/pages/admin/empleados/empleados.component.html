@@ -1,0 +1,393 @@
+<<<<<<< HEAD
+=======
+<div class="p-6 bg-white rounded-lg shadow">
+  <!-- Mensajes de alerta -->
+  <div *ngIf="alertMessage" class="mb-4 p-3 rounded-md {{alertClass}} flex items-center">
+    <span class="mr-2">{{alertIcon}}</span>
+    {{alertMessage}}
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded relative">
+    {{error}}
+    <button (click)="clearError()" class="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg leading-none">×</button>
+  </div>
+
+  <!-- Encabezado y buscador -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <h2 class="text-2xl font-bold text-gray-800">Gestión de Empleados</h2>
+
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
+      <div class="relative w-full md:w-64">
+        <input
+          type="text"
+          placeholder="Buscar empleados..."
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+          class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+
+      <button
+        (click)="openAddModal()"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center w-full md:w-auto justify-center"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Nuevo Empleado
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    <select
+      [(ngModel)]="filtroEstado"
+      (change)="applyFilters()"
+      class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="todos">Todos los estados</option>
+      <option value="activos">Activos</option>
+      <option value="inactivos">Inactivos</option>
+    </select>
+    <select
+      [(ngModel)]="ordenamiento"
+      (change)="applyFilters()"
+      class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="recientes">Recientes primero</option>
+      <option value="antiguos">Antiguos primero</option>
+      <option value="nombre-az">Nombre A-Z</option>
+    </select>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="isLoading" class="text-center py-8">
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <p class="mt-2 text-gray-600">Cargando empleados...</p>
+  </div>
+
+  <!-- Tabla de empleados -->
+  <div class="overflow-x-auto" *ngIf="!isLoading">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let empleado of paginatedEmpleados">
+          <td class="px-6 py-4 whitespace-nowrap">
+            {{ empleado.nombre }} {{ empleado.apellidoPaterno }} {{ empleado.apellidoMaterno }}
+            ID: {{ empleado.personalId }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ empleado.usuario || 'N/A' }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ empleado.telefono || 'N/A' }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ empleado.email || 'N/A' }}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span
+              *ngIf="empleado.activo"
+              class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+              >Activo</span
+            >
+            <span
+              *ngIf="!empleado.activo"
+              class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+              >Inactivo</span
+            >
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button
+              (click)="editEmpleado(empleado)"
+              class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center"
+              title="Editar"
+            >
+              <i class="fas fa-edit mr-1"></i>
+              ✏️
+            </button>
+
+            <button
+              *ngIf="empleado.activo"
+              (click)="toggleEstado(empleado)"
+              class="text-red-600 hover:text-red-900 inline-flex items-center"
+              title="Desactivar"
+            >
+              <i class="fas fa-toggle-off mr-1"></i>
+              🔘
+            </button>
+
+            <button
+              *ngIf="!empleado.activo"
+              (click)="toggleEstado(empleado)"
+              class="text-green-600 hover:text-green-900 inline-flex items-center"
+              title="Activar"
+            >
+              <i class="fas fa-toggle-on mr-1"></i>
+              ✅
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="empleadosFiltrados.length === 0" class="text-center py-8">
+      <p class="text-gray-500">No se encontraron empleados</p>
+      <button (click)="retry()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Reintentar</button>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <div class="flex items-center justify-between mt-6" *ngIf="!isLoading && totalItems > 0">
+    <div class="text-sm text-gray-500">
+      Mostrando {{ startItem }} a {{ endItem }} de {{ totalItems }} empleados
+    </div>
+    <div class="flex space-x-2">
+      <button
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+        class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+      >
+        Anterior
+      </button>
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+        class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para agregar empleado -->
+<div
+  *ngIf="showAddModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+>
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Empleado</h3>
+
+      <form [formGroup]="addForm" (ngSubmit)="saveNewEmpleado()">
+        <!-- Nombre -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre*</label>
+          <input
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('nombre')?.invalid && addForm.get('nombre')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('nombre')?.invalid && addForm.get('nombre')?.touched">
+            {{ getError('nombre', addForm) }}
+          </div>
+        </div>
+
+        <!-- Apellido -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Apellido*</label>
+          <input
+            type="text"
+            formControlName="apellido"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('apellido')?.invalid && addForm.get('apellido')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('apellido')?.invalid && addForm.get('apellido')?.touched">
+            {{ getError('apellido', addForm) }}
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono*</label>
+          <input
+            type="tel"
+            formControlName="telefono"
+            maxlength="10"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('telefono')?.invalid && addForm.get('telefono')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('telefono')?.invalid && addForm.get('telefono')?.touched">
+            {{ getError('telefono', addForm) }}
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+          <input
+            type="email"
+            formControlName="email"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('email')?.invalid && addForm.get('email')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('email')?.invalid && addForm.get('email')?.touched">
+            {{ getError('email', addForm) }}
+          </div>
+        </div>
+
+        <!-- Usuario -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+          <input
+            type="text"
+            formControlName="usuario"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="addForm.get('usuario')?.invalid && addForm.get('usuario')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="addForm.get('usuario')?.invalid && addForm.get('usuario')?.touched">
+            {{ getError('usuario', addForm) }}
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="mb-4">
+          <label class="flex items-center">
+            <input type="checkbox" formControlName="activo" class="rounded text-blue-500 focus:ring-blue-500" />
+            <span class="ml-2 text-sm text-gray-700">Activo</span>
+          </label>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            (click)="closeAddModal()"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="addForm.invalid || isLoading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+          >
+            <span *ngIf="!isLoading">Guardar</span>
+            <span *ngIf="isLoading">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar empleado -->
+<div
+  *ngIf="showEditModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+>
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Editar Empleado</h3>
+
+      <form [formGroup]="editForm" (ngSubmit)="saveEmpleado()">
+        <!-- Nombre -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre*</label>
+          <input
+            type="text"
+            formControlName="nombre"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('nombre')?.invalid && editForm.get('nombre')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('nombre')?.invalid && editForm.get('nombre')?.touched">
+            {{ getError('nombre', editForm) }}
+          </div>
+        </div>
+
+        <!-- Apellido -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Apellido*</label>
+          <input
+            type="text"
+            formControlName="apellido"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('apellido')?.invalid && editForm.get('apellido')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('apellido')?.invalid && editForm.get('apellido')?.touched">
+            {{ getError('apellido', editForm) }}
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono*</label>
+          <input
+            type="tel"
+            formControlName="telefono"
+            maxlength="10"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('telefono')?.invalid && editForm.get('telefono')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('telefono')?.invalid && editForm.get('telefono')?.touched">
+            {{ getError('telefono', editForm) }}
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+          <input
+            type="email"
+            formControlName="email"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched">
+            {{ getError('email', editForm) }}
+          </div>
+        </div>
+
+        <!-- Usuario -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+          <input
+            type="text"
+            formControlName="usuario"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="editForm.get('usuario')?.invalid && editForm.get('usuario')?.touched"
+          />
+          <div class="text-red-500 text-sm mt-1" *ngIf="editForm.get('usuario')?.invalid && editForm.get('usuario')?.touched">
+            {{ getError('usuario', editForm) }}
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="editForm.invalid || isLoading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+          >
+            <span *ngIf="!isLoading">Guardar Cambios</span>
+            <span *ngIf="isLoading">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+>>>>>>> origin/joel
