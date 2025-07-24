@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using GeoApi.Data;
 using GeoApi.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic; // Asegúrate de importar esto para IEnumerable
-using System.ComponentModel.DataAnnotations; // Ya lo tienes, pero para recordar
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace GeoApi.Controllers
 {
@@ -32,7 +32,6 @@ public class ClienteResponseDto
     public bool Activo { get; set; }
     public DateTime FechaCreacion { get; set; }
     
-    // Propiedades calculadas para facilitar el frontend
     public string ClienteIdFormateado => $"CL-{ClienteId.ToString().PadLeft(3, '0')}";
     public string NombreCompleto => $"{Nombre} {ApellidoPaterno} {ApellidoMaterno}";
     public string Iniciales => $"{Nombre[0]}{ApellidoPaterno[0]}";
@@ -191,17 +190,14 @@ public async Task<IActionResult> UpdateCliente(int id, [FromBody] ClienteUpdateM
         return NotFound("Cliente no encontrado");
     }
 
-    // Actualizar datos del cliente
     clienteExistente.Nombre = model.Nombre;
     clienteExistente.ApellidoPaterno = model.ApellidoPaterno;
     clienteExistente.ApellidoMaterno = model.ApellidoMaterno;
     clienteExistente.DireccionEnvio = model.DireccionEnvio;
     clienteExistente.Telefono = model.Telefono;
 
-    // Actualizar email del usuario
     if (clienteExistente.Usuario != null)
     {
-        // Verificar si el nuevo email ya existe para otro usuario
         if (await _context.Usuarios.AnyAsync(u => u.Email == model.Email && u.UsuarioId != clienteExistente.UsuarioId))
         {
             return BadRequest("El correo electrónico ya está en uso por otro usuario");
@@ -265,7 +261,7 @@ public async Task<ActionResult<IEnumerable<ClienteResponseDto>>> SearchClientes(
 
     [Required(ErrorMessage = "La contraseña es requerida")]
     [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
-    public string Password  { get; set; } // Cambiado de PasswordHash a Password
+    public string Password  { get; set; } 
 
     [Required(ErrorMessage = "El nombre es requerido")]
     public string Nombre { get; set; }
@@ -273,24 +269,23 @@ public async Task<ActionResult<IEnumerable<ClienteResponseDto>>> SearchClientes(
     [Required(ErrorMessage = "El apellido paterno es requerido")]
     public string ApellidoPaterno { get; set; }
 
-    public string ApellidoMaterno { get; set; } // Opcional
+    public string ApellidoMaterno { get; set; }
 
     [Required(ErrorMessage = "La dirección es requerida")]
-    public string Direccion { get; set; } // Cambiado de DireccionEnvio a Direccion
-
+    public string Direccion { get; set; }
     [Required(ErrorMessage = "El teléfono es requerido")]
     [Phone(ErrorMessage = "El formato del teléfono no es válido")]
     public string Telefono { get; set; }
 }
 
-    public class ClienteUpdateModel // Clase nueva que necesitas definir
+    public class ClienteUpdateModel 
     {
-        [Required] // Aseguramos que el ID venga en el cuerpo para el PUT
+        [Required] 
         public int ClienteId { get; set; }
 
         [Required(ErrorMessage = "El email es requerido")]
         [EmailAddress(ErrorMessage = "El formato del email no es válido")]
-        public string Email { get; set; } // Incluye el email para actualizar el usuario
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "El nombre es requerido")]
         [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]

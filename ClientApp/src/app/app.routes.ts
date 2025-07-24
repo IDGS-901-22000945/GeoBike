@@ -48,7 +48,7 @@ export const routes: Routes = [
       {
         path: 'registros-clientes',
         component: RegistrosClientesComponent,
-        title: 'Registro de Clientes'
+        title: 'Clientes'
       }
     ]
   },
