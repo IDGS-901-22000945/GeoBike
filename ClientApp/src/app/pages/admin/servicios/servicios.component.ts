@@ -1,19 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Producto, ProductoService } from '../../../services/cliente/producto.service';
-import { Proveedor, ProveedorService } from '../../../services/cliente/proveedor.service';
+import { Servicio, ServicioService } from '../../../services/cliente/servicios.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-admin-productos',
+  selector: 'app-admin-servicios',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './admin-productos.component.html'
+  templateUrl: './servicios.component.html'
 })
-export class AdminProductosComponent implements OnInit {
-  productos: Producto[] = [];
-  productosFiltrados: Producto[] = [];
-  proveedores: Proveedor[] = [];
+export class ServiciosComponent implements OnInit {
+  servicios: Servicio[] = [];
+  serviciosFiltrados: Servicio[] = [];
   isLoading = true;
   error: string | null = null;
   alertMessage: string | null = null;
@@ -33,107 +31,89 @@ export class AdminProductosComponent implements OnInit {
   // Modales
   showAddModal = false;
   showEditModal = false;
-  productoEditando: Producto | null = null;
+  servicioEditando: Servicio | null = null;
 
   // Formularios
   addForm: FormGroup;
   editForm: FormGroup;
 
   constructor(
-    private productoService: ProductoService,
-    private proveedorService: ProveedorService,
+    private servicioService: ServicioService,
     private fb: FormBuilder
   ) {
     this.addForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       descripcion: [''],
-      precio: [0, [Validators.required, Validators.min(0.01)]],
-      stock: [0, [Validators.required, Validators.min(0)]],
-      proveedorId: [null],
+      precioMensual: [null],
       activo: [true]
     });
 
     this.editForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       descripcion: [''],
-      precio: [0, [Validators.required, Validators.min(0.01)]],
-      stock: [0, [Validators.required, Validators.min(0)]],
-      proveedorId: [null],
+      precioMensual: [null],
       activo: [true]
     });
   }
 
   ngOnInit(): void {
-    this.cargarProductos();
-    this.cargarProveedores();
+    this.cargarServicios();
   }
 
-  cargarProductos(): void {
+  cargarServicios(): void {
     this.isLoading = true;
     this.error = null;
 
-    this.productoService.getProductos(true).subscribe({
+    this.servicioService.getServicios().subscribe({
       next: (data) => {
-        this.productos = data;
+        this.servicios = data;
         this.applyFilters();
         this.isLoading = false;
       },
       error: (err) => {
-        this.error = err.message || 'Error al cargar productos';
+        this.error = err.message || 'Error al cargar servicios';
         this.isLoading = false;
-      }
-    });
-  }
-
-  cargarProveedores(): void {
-    this.proveedorService.getProveedores().subscribe({
-      next: (data) => {
-        this.proveedores = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar proveedores:', err);
       }
     });
   }
 
   // Filtros y búsqueda
   applyFilters(): void {
-    let filtered = [...this.productos];
+    let filtered = [...this.servicios];
 
     // Filtrar por estado
     if (this.filtroEstado === 'activos') {
-      filtered = filtered.filter(p => p.activo);
+      filtered = filtered.filter(s => s.activo);
     } else if (this.filtroEstado === 'inactivos') {
-      filtered = filtered.filter(p => !p.activo);
+      filtered = filtered.filter(s => !s.activo);
     }
 
     // Filtrar por término de búsqueda
-   if (this.searchTerm) {
+    if (this.searchTerm) {
   const term = this.searchTerm.toLowerCase();
-  filtered = filtered.filter(p =>
-    p.nombre.toLowerCase().includes(term) ||
-    (p.descripcion && p.descripcion.toLowerCase().includes(term)) ||
-    (p.proveedor?.nombre && p.proveedor.nombre.toLowerCase().includes(term))
+  filtered = filtered.filter(s =>
+    s.nombre.toLowerCase().includes(term) ||
+    (s.descripcion && s.descripcion.toLowerCase().includes(term))
   );
 }
     // Ordenar
     switch (this.ordenamiento) {
       case 'recientes':
-        filtered.sort((a, b) => (b.productoId || 0) - (a.productoId || 0));
+        filtered.sort((a, b) => (b.servicioId || 0) - (a.servicioId || 0));
         break;
       case 'antiguos':
-        filtered.sort((a, b) => (a.productoId || 0) - (b.productoId || 0));
+        filtered.sort((a, b) => (a.servicioId || 0) - (b.servicioId || 0));
         break;
       case 'nombre-az':
         filtered.sort((a, b) => a.nombre.localeCompare(b.nombre));
         break;
       case 'precio-mayor':
-        filtered.sort((a, b) => b.precio - a.precio);
+        filtered.sort((a, b) => (b.precioMensual || 0) - (a.precioMensual || 0));
         break;
     }
 
     this.totalItems = filtered.length;
-    this.productosFiltrados = filtered;
+    this.serviciosFiltrados = filtered;
     this.currentPage = 1; // Resetear a la primera página
   }
 
@@ -171,9 +151,7 @@ export class AdminProductosComponent implements OnInit {
     this.addForm.reset({
       nombre: '',
       descripcion: '',
-      precio: 0,
-      stock: 0,
-      proveedorId: null,
+      precioMensual: null,
       activo: true
     });
     this.showAddModal = true;
@@ -183,85 +161,83 @@ export class AdminProductosComponent implements OnInit {
     this.showAddModal = false;
   }
 
-  openEditModal(producto: Producto): void {
-    this.productoEditando = producto;
+  openEditModal(servicio: Servicio): void {
+    this.servicioEditando = servicio;
     this.editForm.patchValue({
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      precio: producto.precio,
-      stock: producto.stock,
-      proveedorId: producto.proveedorId,
-      activo: producto.activo
+      nombre: servicio.nombre,
+      descripcion: servicio.descripcion,
+      precioMensual: servicio.precioMensual,
+      activo: servicio.activo
     });
     this.showEditModal = true;
   }
 
   closeEditModal(): void {
     this.showEditModal = false;
-    this.productoEditando = null;
+    this.servicioEditando = null;
   }
 
   // CRUD Operations
-  saveNewProducto(): void {
+  saveNewServicio(): void {
     if (this.addForm.invalid) return;
 
     this.isLoading = true;
-    const newProducto = this.addForm.value;
+    const newServicio = this.addForm.value;
 
-    this.productoService.createProducto(newProducto).subscribe({
-      next: (producto) => {
-        this.productos.unshift(producto);
+    this.servicioService.createServicio(newServicio).subscribe({
+      next: (servicio) => {
+        this.servicios.unshift(servicio);
         this.applyFilters();
         this.showAddModal = false;
-        this.showAlert('Producto creado exitosamente', 'success');
+        this.showAlert('Servicio creado exitosamente', 'success');
         this.isLoading = false;
       },
       error: (err) => {
-        this.error = err.message || 'Error al crear producto';
+        this.error = err.message || 'Error al crear servicio';
         this.isLoading = false;
       }
     });
   }
 
-  saveProducto(): void {
-    if (this.editForm.invalid || !this.productoEditando) return;
+  saveServicio(): void {
+    if (this.editForm.invalid || !this.servicioEditando) return;
 
     this.isLoading = true;
-    const updatedProducto = { ...this.productoEditando, ...this.editForm.value };
+    const updatedServicio = { ...this.servicioEditando, ...this.editForm.value };
 
-    this.productoService.updateProducto(updatedProducto).subscribe({
-      next: (producto) => {
-        const index = this.productos.findIndex(p => p.productoId === producto.productoId);
+    this.servicioService.updateServicio(updatedServicio).subscribe({
+      next: (servicio) => {
+        const index = this.servicios.findIndex(s => s.servicioId === servicio.servicioId);
         if (index !== -1) {
-          this.productos[index] = producto;
+          this.servicios[index] = servicio;
           this.applyFilters();
         }
         this.showEditModal = false;
-        this.showAlert('Producto actualizado exitosamente', 'success');
+        this.showAlert('Servicio actualizado exitosamente', 'success');
         this.isLoading = false;
       },
       error: (err) => {
-        this.error = err.message || 'Error al actualizar producto';
+        this.error = err.message || 'Error al actualizar servicio';
         this.isLoading = false;
       }
     });
   }
 
-  cambiarEstado(producto: Producto): void {
-    if (producto.productoId === undefined) return;
+  cambiarEstado(servicio: Servicio): void {
+    if (servicio.servicioId === undefined) return;
 
-    const newState = !producto.activo;
+    const newState = !servicio.activo;
     const action = newState ? 'activar' : 'desactivar';
 
-    if (confirm(`¿Estás seguro que deseas ${action} este producto?`)) {
-      this.productoService.toggleActivo(producto.productoId).subscribe({
+    if (confirm(`¿Estás seguro que deseas ${action} este servicio?`)) {
+      this.servicioService.toggleActivo(servicio.servicioId).subscribe({
         next: () => {
-          producto.activo = newState;
+          servicio.activo = newState;
           this.applyFilters();
-          this.showAlert(`Producto ${newState ? 'activado' : 'desactivado'} exitosamente`, 'success');
+          this.showAlert(`Servicio ${newState ? 'activado' : 'desactivado'} exitosamente`, 'success');
         },
         error: (err) => {
-          this.error = err.message || `Error al ${action} producto`;
+          this.error = err.message || `Error al ${action} servicio`;
         }
       });
     }
