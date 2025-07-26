@@ -2,125 +2,88 @@
   <h1 class="text-4xl font-extrabold text-center text-blue-800 mb-12">Tu carrito de compras</h1>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Productos en el carrito -->
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl border border-blue-200 p-6">
-      <div class="grid grid-cols-12 font-semibold text-blue-800 border-b border-blue-200 pb-2 mb-4">
-        <span class="col-span-2"></span>
-        <span class="col-span-3">Producto</span>
-        <span class="col-span-2 text-center">P. Unitario</span>
-        <span class="col-span-2 text-center">Cantidad</span>
-        <span class="col-span-1 text-center">Acción</span>
-        <span class="col-span-2 text-right">Total</span>
-      </div>
+    <!-- Carrito -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl border border-blue-200 p-6 overflow-x-auto">
+      <table class="w-full text-left text-blue-800">
+        <thead class="border-b border-blue-200 font-semibold">
+          <tr>
+            <th class="p-3">Tipo</th>
+            <th class="p-3">Nombre</th>
+            <th class="p-3 text-center w-32">P. Unitario</th>
+            <th class="p-3 text-center w-32">Cantidad</th>
+            <th class="p-3 text-center w-20">Acción</th>
+            <th class="p-3 text-right w-32">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items; let i = index" class="border-b border-gray-200">
+            <td class="p-3 text-sm font-medium">
+              <span class="px-2 py-1 rounded-full text-white text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-blue-500': item.tipo === 'producto',
+                      'bg-green-500': item.tipo === 'servicio'
+                    }">
+                {{ item.tipo === 'producto' ? 'Producto' : 'Servicio' }}
+              </span>
+            </td>
 
-      <!-- Producto 1 - Ejemplo estático -->
-      <div class="grid grid-cols-12 items-center border-b border-gray-200 py-4">
-        <!-- Imagen -->
-        <div class="col-span-2">
-          <img src="https://via.placeholder.com/150?text=GPS+Bike" alt="GPS para bicicleta"
-               class="w-20 h-20 object-cover rounded-lg border">
-        </div>
+            <td class="p-3 font-medium">
+              {{ item.nombre }}
+            </td>
 
-        <!-- Nombre -->
-        <div class="col-span-3 text-blue-800 font-medium">
-          <h3>GPS GeoBike Pro</h3>
-          <p class="text-xs text-gray-500">Modelo 2024</p>
-        </div>
+            <td class="p-3 text-center">${{ obtenerPrecioUnitario(item).toFixed(2) }}</td>
 
-        <!-- Precio Unitario -->
-        <p class="col-span-2 text-center text-blue-800 font-medium">$99.99</p>
+            <td class="p-3 text-center">
+              <input
+                type="number"
+                min="1"
+                [value]="item.cantidad"
+                (input)="actualizarCantidad(i, $event)"
+                class="w-16 text-center border border-blue-300 rounded-lg text-blue-800 font-medium text-sm"
+              />
+            </td>
 
-        <!-- Cantidad -->
-        <div class="col-span-2 flex justify-center">
-          <div class="flex items-center gap-2">
-            <input type="number"
-                   min="1"
-                   max="10"
-                   value="1"
-                   class="w-16 text-center border border-blue-300 rounded-lg text-blue-800 font-medium text-sm">
-          </div>
-        </div>
+            <td class="p-3 text-center">
+              <button (click)="eliminarItem(i)"
+                      class="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
 
-        <!-- Botón Eliminar -->
-        <div class="col-span-1 text-center">
-          <button class="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200 cursor-not-allowed" disabled>
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </div>
+            <td class="p-3 text-right font-semibold text-blue-600">
+              ${{ (obtenerPrecioUnitario(item) * item.cantidad).toFixed(2) }}
+            </td>
+          </tr>
 
-        <!-- Total -->
-        <p class="col-span-2 text-right text-blue-600 font-semibold">
-          $99.99
-        </p>
-      </div>
-
-      <!-- Producto 2 - Ejemplo estático -->
-      <div class="grid grid-cols-12 items-center border-b border-gray-200 py-4">
-        <!-- Imagen -->
-        <div class="col-span-2">
-          <img src="https://via.placeholder.com/150?text=Bike+Lock" alt="Candado para bicicleta"
-               class="w-20 h-20 object-cover rounded-lg border">
-        </div>
-
-        <!-- Nombre -->
-        <div class="col-span-3 text-blue-800 font-medium">
-          <h3>Candado Antirobo Acero</h3>
-          <p class="text-xs text-gray-500">12mm de grosor</p>
-        </div>
-
-        <!-- Precio Unitario -->
-        <p class="col-span-2 text-center text-blue-800 font-medium">$49.99</p>
-
-        <!-- Cantidad -->
-        <div class="col-span-2 flex justify-center">
-          <div class="flex items-center gap-2">
-            <input type="number"
-                   min="1"
-                   max="10"
-                   value="2"
-                   class="w-16 text-center border border-blue-300 rounded-lg text-blue-800 font-medium text-sm">
-          </div>
-        </div>
-
-        <!-- Botón Eliminar -->
-        <div class="col-span-1 text-center">
-          <button class="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition duration-200 cursor-not-allowed" disabled>
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </div>
-
-        <!-- Total -->
-        <p class="col-span-2 text-right text-blue-600 font-semibold">
-          $99.98
-        </p>
-      </div>
-
-      <!-- Mensaje carrito vacío (oculto en este caso) -->
-      <div class="text-center text-blue-800 mt-6 text-sm font-medium col-span-12 hidden">
-        <i class="fas fa-info-circle mr-1"></i> No tienes productos en tu carrito aún.
-      </div>
+          <tr *ngIf="items.length === 0">
+            <td colspan="6" class="text-center p-4 text-blue-800 font-medium">
+              <i class="fas fa-info-circle mr-1"></i> No tienes productos ni servicios en tu carrito.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Detalles del pedido -->
+    <!-- Resumen -->
     <div class="bg-white rounded-2xl shadow-xl border border-blue-200 p-6 h-fit self-start sticky top-24">
       <h2 class="text-2xl font-bold text-blue-800 mb-6">Resumen del pedido</h2>
 
       <div class="mb-4 border-t border-gray-200 pt-4">
         <div class="flex justify-between text-sm text-gray-600">
-          <span>Subtotal (2 productos):</span>
-          <span>$199.97</span>
+          <span>Subtotal ({{ items.length }} ítems):</span>
+          <span>${{ subtotal.toFixed(2) }}</span>
         </div>
         <div class="flex justify-between text-sm text-gray-600">
           <span>Envío:</span>
-          <span>$5.99</span>
+          <span>${{ envio.toFixed(2) }}</span>
         </div>
         <div class="flex justify-between font-bold text-lg text-blue-800 mt-5">
           <span>Total:</span>
-          <span>$205.96</span>
+          <span>${{ total.toFixed(2) }}</span>
         </div>
       </div>
 
-      <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 cursor-not-allowed" disabled>
+      <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 cursor-pointer">
         Proceder al pago
       </button>
 
@@ -133,7 +96,6 @@
 </div>
 
 <style>
-  /* Estilos personalizados para los inputs de cantidad */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
