@@ -96,17 +96,17 @@
     <i class="fas fa-edit mr-1"></i>
   </button>
 
-  <button
+<button
     *ngIf="!$any(cliente).activo"
     (click)="toggleEstado(cliente)"
-    class="text-red-600 hover:text-red-900 inline-flex items-center">
+    class="text-green-600 hover:text-green-900 inline-flex items-center">
     <i class="fas fa-toggle-off mr-1"></i>
 </button>
 
 <button
     *ngIf="$any(cliente).activo"
     (click)="toggleEstado(cliente)"
-    class="text-green-600 hover:text-green-900 inline-flex items-center">
+    class="text-red-600 hover:text-red-900 inline-flex items-center">
     <i class="fas fa-toggle-on mr-1"></i>
 </button>
 </td>

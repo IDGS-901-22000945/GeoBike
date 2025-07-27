@@ -83,8 +83,16 @@
         </div>
       </div>
 
+      <!-- Proceder al pago -->
       <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 cursor-pointer">
         Proceder al pago
+      </button>
+
+      <!-- Vaciar carrito -->
+      <button *ngIf="items.length > 0"
+        (click)="vaciarCarrito()"
+        class="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200">
+        Vaciar carrito
       </button>
 
       <div class="mt-4 flex items-center text-sm text-gray-500">

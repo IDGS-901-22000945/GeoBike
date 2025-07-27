@@ -53,4 +53,9 @@ export class CarritoComponent implements OnInit {
   get total(): number {
     return this.carritoService.getTotal();
   }
+
+  vaciarCarrito() {
+    this.carritoService.vaciar();
+    this.items = [];
+  }
 }

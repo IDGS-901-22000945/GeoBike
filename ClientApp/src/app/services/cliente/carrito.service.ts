@@ -74,4 +74,8 @@ export class CarritoService {
   getTotal(): number {
     return this.getSubtotal() + this.getEnvio();
   }
+
+  vaciar() {
+    this.items = [];
+  }
 }
