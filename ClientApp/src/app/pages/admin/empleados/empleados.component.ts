@@ -373,16 +373,7 @@ export class EmpleadosComponent implements OnInit {
   }
 
   getAvatarColor(nombre: string): string {
-    const colores = [
-      'bg-red-200', 'bg-blue-200', 'bg-green-200', 'bg-yellow-200',
-      'bg-purple-200', 'bg-pink-200', 'bg-indigo-200', 'bg-orange-200'
-    ];
-    let hash = 0;
-    for (let i = 0; i < nombre.length; i++) {
-      hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const index = Math.abs(hash % colores.length);
-    return colores[index];
+    return 'bg-blue-200 text-blue-800';
   }
 
   get startItem(): number {
