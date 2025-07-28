@@ -1,6 +1,10 @@
-// src/app/autenticacion/role.guard.ts
 import { Injectable } from '@angular/core';
-import { CanActivateChild, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import {
+  CanActivateChild,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  Router
+} from '@angular/router';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -12,19 +16,26 @@ export class RoleGuard implements CanActivateChild {
   canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     const usuario = this.authService.obtenerUsuario();
 
+    // Si no hay usuario, redirigir
     if (!usuario) {
       this.router.navigate(['/login']);
       return false;
     }
 
-    const rolesPermitidos = route.data['roles'] as string[];
+    const rolesPermitidos = route.data?.['roles'] as string[] | undefined;
+    const rolUsuario = usuario.rol;
 
-    if (rolesPermitidos.includes(usuario.rol)) {
+    // Si no se especifican roles en la ruta, permitir el acceso
+    if (!rolesPermitidos) {
       return true;
     }
 
-    // ❌ Si no tiene el rol requerido, lo mandamos al inicio
-    this.router.navigate(['/']);
-    return false;
+    const tieneAcceso = rolesPermitidos.includes(rolUsuario);
+
+    if (!tieneAcceso) {
+      this.router.navigate(['/']);
+    }
+
+    return tieneAcceso;
   }
 }

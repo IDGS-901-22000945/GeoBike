@@ -24,13 +24,13 @@ export const routes: Routes = [
     canActivateChild: [RoleGuard],
     data: { roles: ['admin', 'empleado'] },
     children: [
-      { path: '', component: AdminComponent, title: 'Panel de Administración' },
-      { path: 'empleados', component: EmpleadosComponent, title: 'Empleados' },
-      { path: 'proveedores', component: RegistrosProveedoresComponent, title: 'Proveedores' },
-      { path: 'productos', component: AdminProductosComponent, title: 'Productos' },
-      { path: 'ventas', component: VentasComponent, title: 'Ventas' },
-      { path: 'registros-clientes', component: RegistrosClientesComponent, title: 'Clientes' },
-      { path: 'servicios', component: ServiciosComponent, title: 'Servicios' }
+      { path: '', component: AdminComponent, title: 'Panel de Administración', data: { roles: ['admin', 'empleado'] } },
+      { path: 'empleados', component: EmpleadosComponent, title: 'Empleados', data: { roles: ['admin', 'empleado'] } },
+      { path: 'proveedores', component: RegistrosProveedoresComponent, title: 'Proveedores', data: { roles: ['admin', 'empleado'] } },
+      { path: 'productos', component: AdminProductosComponent, title: 'Productos', data: { roles: ['admin', 'empleado'] } },
+      { path: 'ventas', component: VentasComponent, title: 'Ventas', data: { roles: ['admin', 'empleado'] } },
+      { path: 'registros-clientes', component: RegistrosClientesComponent, title: 'Clientes', data: { roles: ['admin', 'empleado'] } },
+      { path: 'servicios', component: ServiciosComponent, title: 'Servicios', data: { roles: ['admin', 'empleado'] } }
     ]
   },
 
