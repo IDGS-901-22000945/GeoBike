@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  CarritoService,
-  ItemCarrito
-} from '../../../services/cliente/carrito.service';
+import { CarritoService, ItemCarrito } from '../../../services/cliente/carrito.service';
 
 @Component({
   selector: 'app-carrito',
@@ -28,8 +25,10 @@ export class CarritoComponent implements OnInit {
     if (nuevaCantidad >= 1) {
       this.items[index].cantidad = nuevaCantidad;
       this.carritoService.actualizarCantidad(index, nuevaCantidad);
+      this.items = this.carritoService.obtenerItems(); // Refrescar vista
     }
   }
+
 
   eliminarItem(index: number) {
     this.carritoService.eliminarItem(index);

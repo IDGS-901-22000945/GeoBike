@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Producto } from './producto.service';
-import { Servicio } from './servicios.service'; // corregí nombre archivo
+import { Servicio } from './servicios.service';
 
 export type TipoItem = 'producto' | 'servicio';
 
@@ -22,6 +22,21 @@ export type ItemCarrito = ProductoCarrito | ServicioCarrito;
 export class CarritoService {
   private items: ItemCarrito[] = [];
 
+  constructor() {
+    this.cargarDesdeLocalStorage();
+  }
+
+  private guardarEnLocalStorage() {
+    localStorage.setItem('carrito', JSON.stringify(this.items));
+  }
+
+  private cargarDesdeLocalStorage() {
+    const datos = localStorage.getItem('carrito');
+    if (datos) {
+      this.items = JSON.parse(datos);
+    }
+  }
+
   obtenerItems(): ItemCarrito[] {
     return this.items;
   }
@@ -36,6 +51,8 @@ export class CarritoService {
     } else {
       this.items.push({ ...producto, cantidad: 1, tipo: 'producto' });
     }
+
+    this.guardarEnLocalStorage();
   }
 
   agregarServicio(servicio: Servicio) {
@@ -48,15 +65,19 @@ export class CarritoService {
     } else {
       this.items.push({ ...servicio, cantidad: 1, tipo: 'servicio' });
     }
+
+    this.guardarEnLocalStorage();
   }
 
   eliminarItem(index: number) {
     this.items.splice(index, 1);
+    this.guardarEnLocalStorage();
   }
 
   actualizarCantidad(index: number, cantidad: number) {
-    if (cantidad > 0) {
+    if (cantidad > 0 && this.items[index]) {
       this.items[index].cantidad = cantidad;
+      this.guardarEnLocalStorage();
     }
   }
 
@@ -77,5 +98,6 @@ export class CarritoService {
 
   vaciar() {
     this.items = [];
+    localStorage.removeItem('carrito');
   }
 }

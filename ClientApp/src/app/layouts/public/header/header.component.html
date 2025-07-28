@@ -6,7 +6,12 @@
     </a>
     <div class="flex items-center space-x-6">
       <ul class="flex space-x-6">
-        <li><a routerLink="/login" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Inicia Sesión</a></li>
+        <li *ngIf="!usuarioLogueado">
+          <a routerLink="/login" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Inicia Sesión</a>
+        </li>
+        <li *ngIf="usuarioLogueado">
+          <button (click)="logout()" class="text-gray-700 hover:text-red-500 font-medium transition-colors">Cerrar Sesión</button>
+        </li>
         <li><a routerLink="/nosotros" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Nosotros</a></li>
         <li><a routerLink="/productos" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Productos</a></li>
       </ul>

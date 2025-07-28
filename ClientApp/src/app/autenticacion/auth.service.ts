@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { CarritoService } from '../services/cliente/carrito.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,11 @@ import { catchError, tap } from 'rxjs/operators';
 export class AuthService {
   private apiUrl = 'https://localhost:7097/api/login';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private carritoService: CarritoService
+  ) {}
 
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(
@@ -52,19 +57,18 @@ export class AuthService {
     return !!this.obtenerUsuario();
   }
 
-  // Devuelve el usuario actual desde localStorage
   getCurrentUser(): any {
     const userJson = localStorage.getItem('usuario');
     return userJson ? JSON.parse(userJson) : null;
   }
 
-  // Verifica si hay sesión activa
   isLoggedIn(): boolean {
     return !!this.getCurrentUser();
   }
 
   logout(): void {
     localStorage.removeItem('usuario');
-    this.router.navigate(['/login']);
+    this.carritoService.vaciar();
+    this.router.navigate(['/']);
   }
 }
