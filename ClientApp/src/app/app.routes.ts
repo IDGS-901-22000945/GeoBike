@@ -14,48 +14,23 @@ import { AdminProductosComponent } from './pages/admin/admin-productos/admin-pro
 import { RegistrosClientesComponent } from './pages/admin/registros-clientes/registros-clientes.component';
 import { RegistrosProveedoresComponent } from './pages/admin/proveedores/proveedores.component';
 import { ServiciosComponent } from './pages/admin/servicios/servicios.component';
+import { RoleGuard } from './autenticacion/role.guard';
 
 export const routes: Routes = [
   // --- Sección de Administración ---
   {
-    path: 'admin',
+  path: 'admin',
     component: AdminLayoutComponent,
+    canActivateChild: [RoleGuard],
+    data: { roles: ['admin', 'empleado'] },
     children: [
-      {
-        path: '',
-        component: AdminComponent,
-        title: 'Panel de Administración'
-      },
-      {
-        path: 'empleados',
-        component: EmpleadosComponent,
-        title: 'Empleados'
-      },
-      {
-        path: 'proveedores',
-        component: RegistrosProveedoresComponent,
-        title: 'Proveedores'
-      },
-      {
-        path: 'productos',
-        component: AdminProductosComponent,
-        title: 'Productos'
-      },
-      {
-        path: 'ventas',
-        component: VentasComponent,
-        title: 'Ventas'
-      },
-      {
-        path: 'registros-clientes',
-        component: RegistrosClientesComponent,
-        title: 'Clientes'
-      },
-      {
-        path: 'servicios',
-        component: ServiciosComponent,
-        title: 'servicios'
-      }
+      { path: '', component: AdminComponent, title: 'Panel de Administración' },
+      { path: 'empleados', component: EmpleadosComponent, title: 'Empleados' },
+      { path: 'proveedores', component: RegistrosProveedoresComponent, title: 'Proveedores' },
+      { path: 'productos', component: AdminProductosComponent, title: 'Productos' },
+      { path: 'ventas', component: VentasComponent, title: 'Ventas' },
+      { path: 'registros-clientes', component: RegistrosClientesComponent, title: 'Clientes' },
+      { path: 'servicios', component: ServiciosComponent, title: 'Servicios' }
     ]
   },
 

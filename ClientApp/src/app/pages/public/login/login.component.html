@@ -1,69 +1,54 @@
 <div class="pt-20 md:pt-24 min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-md w-full space-y-8">
-    <!-- Header del Login -->
-    <div class="text-center">
-      <!-- Logo -->
-      <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 p-2">
-        <img
-          src="assets/img/geobike.png"
-          alt="GeoBike Shield Logo"
-          class="h-10 w-10 object-contain"
-        >
-      </div>
 
-      <h2 class="text-3xl font-bold text-gray-900 mb-2">
-        Inicia Sesión
-      </h2>
-      <p class="text-gray-600">
-        Accede a GeoBike Shield
-      </p>
+    <!-- Header -->
+    <div class="text-center">
+      <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 p-2">
+        <img src="assets/img/geobike.png" alt="GeoBike Shield Logo" class="h-10 w-10 object-contain">
+      </div>
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">Inicia Sesión</h2>
+      <p class="text-gray-600">Accede a GeoBike Shield</p>
     </div>
 
-    <!-- Formulario de Login -->
+    <!-- Formulario -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-      <form class="space-y-6">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
 
-        <!-- Campo Email -->
+        <!-- Email -->
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-            Correo Electrónico
-          </label>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-envelope text-gray-400"></i>
             </div>
             <input
               id="email"
-              name="email"
               type="email"
-              required
+              formControlName="email"
               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               placeholder="tu@email.com"
             >
           </div>
         </div>
 
-        <!-- Campo Contraseña -->
+        <!-- Password -->
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-            Contraseña
-          </label>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-lock text-gray-400"></i>
             </div>
             <input
               id="password"
-              name="password"
               type="password"
-              required
+              formControlName="password"
               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               placeholder="••••••••"
             >
           </div>
         </div>
 
-        <!-- Opciones adicionales -->
+        <!-- Recordarme -->
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <input
@@ -72,16 +57,15 @@
               type="checkbox"
               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             >
-            <label for="remember-me" class="ml-2 block text-sm text-gray-700">
-              Recordarme
-            </label>
+            <label for="remember-me" class="ml-2 block text-sm text-gray-700">Recordarme</label>
           </div>
         </div>
 
-        <!-- Botón de Login -->
+        <!-- Botón -->
         <div>
           <button
             type="submit"
+            [disabled]="loginForm.invalid"
             class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 transform hover:scale-105"
           >
             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -90,6 +74,12 @@
             Iniciar Sesión
           </button>
         </div>
+
+        <!-- Mensaje de error -->
+        <div *ngIf="error" class="text-red-600 text-sm text-center">
+          {{ error }}
+        </div>
+
       </form>
 
       <!-- Link de registro -->
