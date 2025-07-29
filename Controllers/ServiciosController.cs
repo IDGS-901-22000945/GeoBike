@@ -49,8 +49,43 @@ namespace GeoApi.Controllers
             return CreatedAtAction(nameof(GetServicio), new { id = servicio.ServicioId }, servicio);
         }
 
+        // Agrega este método en tu ServiciosController.cs
+[HttpPut("{id}")]
+public async Task<IActionResult> PutServicio(int id, Servicio servicio)
+{
+    if (id != servicio.ServicioId)
+    {
+        return BadRequest();
+    }
+
+    _context.Entry(servicio).State = EntityState.Modified;
+
+    try
+    {
+        await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateConcurrencyException)
+    {
+        if (!ServicioExists(id))
+        {
+            return NotFound();
+        }
+        else
+        {
+            throw;
+        }
+    }
+
+    return NoContent();
+}
+
+private bool ServicioExists(int id)
+{
+    return _context.Servicios.Any(e => e.ServicioId == id);
+}
+
         // PUT: api/servicios/5/toggle-activo
-        [HttpPut("{id}/toggle-activo")]
+       [HttpPatch("{id}/toggle-activo")] // ← Cambia a PATCH
         public async Task<IActionResult> ToggleActivo(int id)
         {
             var servicio = await _context.Servicios.FindAsync(id);

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClienteService, Cliente, ClienteUpdateModel } from '../../../services/cliente/cliente.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-registros-clientes',
@@ -199,61 +200,139 @@ getClienteProperty(cliente: any, property: string): any {
   return cliente[property];
 }
 
+toggleEstado(cliente: Cliente): void {
+  const accion = cliente.usuario?.activo ? 'desactivar' : 'activar';
+  const estadoFuturo = cliente.usuario?.activo ? 'desactivado' : 'activado';
 
-  toggleEstado(cliente: Cliente): void {
-    const accion = cliente.usuario?.activo ? 'desactivar' : 'activar';
-
-    if (confirm(`¿Está seguro de que desea ${accion} a ${cliente.nombre}?`)) {
+  Swal.fire({
+    title: `¿${accion.charAt(0).toUpperCase() + accion.slice(1)} cliente?`,
+    html: `Estás a punto de <strong>${accion}</strong> el acceso de:<br>
+           <b>${cliente.nombre} ${cliente.apellidoPaterno}</b><br>
+           <small>ID: ${cliente.clienteId}</small>`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: `Sí, ${accion}`,
+    cancelButtonText: 'Cancelar',
+    backdrop: `
+      rgba(0,0,0,0.7)
+      url("/assets/images/warning-icon.png")
+      center left
+      no-repeat
+    `
+  }).then((result) => {
+    if (result.isConfirmed) {
       this.isLoading = true;
-      console.log(`🔄 Cambiando estado de cliente ${cliente.clienteId} a ${accion}`);
+
+      // Mostrar loader mientras se procesa
+      Swal.fire({
+        title: 'Procesando...',
+        html: `Por favor espera mientras ${accion} el cliente`,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
       this.clienteService.toggleEstadoCliente(cliente.clienteId).subscribe({
         next: (response) => {
-          console.log('✅ Estado cambiado exitosamente:', response);
-          this.loadClientes(); // Recargar la lista
+          Swal.fire({
+            title: '¡Éxito!',
+            text: `El cliente ha sido ${estadoFuturo} correctamente`,
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            timer: 2000,
+            timerProgressBar: true
+          });
+          this.loadClientes();
         },
         error: (error) => {
+          Swal.fire({
+            title: 'Error',
+            text: `No se pudo ${accion} el cliente: ${error.message}`,
+            icon: 'error',
+            confirmButtonText: 'Entendido'
+          });
           this.handleError(error, `${accion} cliente`);
+        },
+        complete: () => {
+          this.isLoading = false;
         }
       });
     }
-  }
+  });
+}
 
   // Abrir modal de edición
 editCliente(cliente: Cliente): void {
-  this.clienteSeleccionado = cliente;
-  this.editForm = {
-    clienteId: cliente.clienteId,
-    email: (cliente as any).email || '',  // ✅ CORRECTO: accede directo al email
-    nombre: cliente.nombre,
-    apellidoPaterno: cliente.apellidoPaterno,
-    apellidoMaterno: cliente.apellidoMaterno || '',
-    direccionEnvio: cliente.direccionEnvio,
-    telefono: cliente.telefono
-  };
-  this.showEditModal = true;
+  // Mostrar confirmación antes de editar
+  Swal.fire({
+    title: '¿Editar cliente?',
+    text: `Vas a editar los datos de ${cliente.nombre} ${cliente.apellidoPaterno}`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, editar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.clienteSeleccionado = cliente;
+      this.editForm = {
+        clienteId: cliente.clienteId,
+        email: (cliente as any).email || '',
+        nombre: cliente.nombre,
+        apellidoPaterno: cliente.apellidoPaterno,
+        apellidoMaterno: cliente.apellidoMaterno || '',
+        direccionEnvio: cliente.direccionEnvio,
+        telefono: cliente.telefono
+      };
+      this.showEditModal = true;
+    }
+  });
 }
 
   // Guardar cambios del cliente
-  saveCliente(): void {
-    if (this.editForm.clienteId) {
-      this.isLoading = true;
-      console.log('💾 Guardando cambios del cliente:', this.editForm);
+ saveCliente(): void {
+  if (this.editForm.clienteId) {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
 
-      this.clienteService.updateCliente(this.editForm.clienteId, this.editForm).subscribe({
-        next: (response) => {
-          console.log('✅ Cliente actualizado correctamente:', response);
-          this.showEditModal = false;
-          this.loadClientes();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.handleError(error, 'actualizar cliente');
-          this.showEditModal = false; // Cerrar modal incluso si hay error
-        }
-      });
-    }
+    Toast.fire({
+      icon: 'info',
+      title: 'Guardando cambios...'
+    });
+
+    this.clienteService.updateCliente(this.editForm.clienteId, this.editForm).subscribe({
+      next: (response) => {
+        Toast.fire({
+          icon: 'success',
+          title: 'Cliente actualizado'
+        });
+        this.showEditModal = false;
+        this.loadClientes();
+      },
+      error: (error) => {
+        Toast.fire({
+          icon: 'error',
+          title: 'Error al guardar'
+        });
+        this.handleError(error, 'actualizar cliente');
+        this.showEditModal = false;
+      }
+    });
   }
+}
 
   // Cerrar modal
   closeModal(): void {

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Servicio, ServicioService } from '../../../services/cliente/servicios.service';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-admin-servicios',
@@ -172,91 +174,122 @@ export class ServiciosComponent implements OnInit {
     this.showEditModal = true;
   }
 
-  closeEditModal(): void {
-    this.showEditModal = false;
-    this.servicioEditando = null;
-  }
+ closeEditModal(): void {
+  // Resetear el formulario
+  this.editForm.reset();
+
+  // Cerrar el modal
+  this.showEditModal = false;
+
+  // Limpiar el servicio en edición
+  this.servicioEditando = null;
+
+  // Forzar detección de cambios si es necesario
+}
 
   // CRUD Operations
-  saveNewServicio(): void {
-    if (this.addForm.invalid) return;
+ // Helpers (manteniendo tu estructura pero con SweetAlert)
+showAlert(message: string, type: 'success' | 'error' | 'info'): void {
+  Swal.fire({
+    title: message,
+    icon: type,
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    background: type === 'success' ? '#f0fdf4' :
+               type === 'error' ? '#fef2f2' :
+               '#eff6ff',
+    color: type === 'success' ? '#166534' :
+          type === 'error' ? '#b91c1c' :
+          '#1e40af'
+  });
+}
 
-    this.isLoading = true;
-    const newServicio = this.addForm.value;
+// CRUD Operations (estructura original con SweetAlert)
+saveNewServicio(): void {
+  if (this.addForm.invalid) return;
 
-    this.servicioService.createServicio(newServicio).subscribe({
-      next: (servicio) => {
-        this.servicios.unshift(servicio);
-        this.applyFilters();
-        this.showAddModal = false;
-        this.showAlert('Servicio creado exitosamente', 'success');
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.error = err.message || 'Error al crear servicio';
-        this.isLoading = false;
-      }
-    });
-  }
+  this.isLoading = true;
+  const newServicio = this.addForm.value;
 
-  saveServicio(): void {
-    if (this.editForm.invalid || !this.servicioEditando) return;
-
-    this.isLoading = true;
-    const updatedServicio = { ...this.servicioEditando, ...this.editForm.value };
-
-    this.servicioService.updateServicio(updatedServicio).subscribe({
-      next: (servicio) => {
-        const index = this.servicios.findIndex(s => s.servicioId === servicio.servicioId);
-        if (index !== -1) {
-          this.servicios[index] = servicio;
-          this.applyFilters();
-        }
-        this.showEditModal = false;
-        this.showAlert('Servicio actualizado exitosamente', 'success');
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.error = err.message || 'Error al actualizar servicio';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  cambiarEstado(servicio: Servicio): void {
-    if (servicio.servicioId === undefined) return;
-
-    const newState = !servicio.activo;
-    const action = newState ? 'activar' : 'desactivar';
-
-    if (confirm(`¿Estás seguro que deseas ${action} este servicio?`)) {
-      this.servicioService.toggleActivo(servicio.servicioId).subscribe({
-        next: () => {
-          servicio.activo = newState;
-          this.applyFilters();
-          this.showAlert(`Servicio ${newState ? 'activado' : 'desactivado'} exitosamente`, 'success');
-        },
-        error: (err) => {
-          this.error = err.message || `Error al ${action} servicio`;
-        }
-      });
+  this.servicioService.createServicio(newServicio).subscribe({
+    next: (servicio) => {
+      this.servicios.unshift(servicio);
+      this.applyFilters();
+      this.showAddModal = false;
+      this.showAlert('Servicio creado exitosamente', 'success');
+      this.isLoading = false;
+    },
+    error: (err) => {
+      this.showAlert(err.message || 'Error al crear servicio', 'error');
+      this.isLoading = false;
     }
+  });
+}
+
+saveServicio(): void {
+  if (this.editForm.invalid || !this.servicioEditando) {
+    this.showAlert('Formulario inválido', 'error');
+    return;
   }
 
-  // Helpers
-  showAlert(message: string, type: 'success' | 'error' | 'info'): void {
-    this.alertMessage = message;
-    this.alertClass = type === 'success' ? 'bg-green-100 text-green-800' :
-                     type === 'error' ? 'bg-red-100 text-red-800' :
-                     'bg-blue-100 text-blue-800';
-    this.alertIcon = type === 'success' ? '✓' :
-                    type === 'error' ? '✗' :
-                    'i';
+  this.isLoading = true;
+  const updatedServicio = { ...this.servicioEditando, ...this.editForm.value };
 
-    setTimeout(() => {
-      this.alertMessage = null;
-    }, 5000);
+  this.servicioService.updateServicio(updatedServicio).subscribe({
+    next: (servicio) => {
+      const index = this.servicios.findIndex(s => s.servicioId === servicio.servicioId);
+      if (index !== -1) {
+        this.servicios[index] = servicio;
+        this.applyFilters();
+      }
+      this.showAlert('Servicio actualizado exitosamente', 'success');
+      this.closeEditModal(); // Asegurar que se cierre el modal
+      this.isLoading = false;
+    },
+    error: (err) => {
+      this.showAlert(err.message || 'Error al actualizar servicio', 'error');
+      this.isLoading = false;
+      // No cerramos el modal en error para permitir correcciones
+    },
+    complete: () => {
+      this.isLoading = false; // Asegurar que loading se desactive siempre
+    }
+  });
+}
+
+async cambiarEstado(servicio: Servicio): Promise<void> {
+  if (servicio.servicioId === undefined) return;
+
+  const newState = !servicio.activo;
+  const action = newState ? 'activar' : 'desactivar';
+
+  const result = await Swal.fire({
+    title: `¿${action.charAt(0).toUpperCase() + action.slice(1)} servicio?`,
+    text: `¿Estás seguro que deseas ${action} este servicio?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: `Sí, ${action}`,
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isConfirmed) {
+    this.servicioService.toggleActivo(servicio.servicioId).subscribe({
+      next: () => {
+        servicio.activo = newState;
+        this.applyFilters();
+        this.showAlert(`Servicio ${newState ? 'activado' : 'desactivado'} exitosamente`, 'success');
+      },
+      error: (err) => {
+        this.showAlert(err.message || `Error al ${action} servicio`, 'error');
+      }
+    });
   }
+}
 
   clearError(): void {
     this.error = null;

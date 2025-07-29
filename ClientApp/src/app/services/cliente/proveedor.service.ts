@@ -94,11 +94,13 @@ export class ProveedorService {
     );
   }
 
-  searchProveedores(searchTerm: string): Observable<Proveedor[]> {
-    return this.http.get<Proveedor[]>(`${this.apiUrl}/search?q=${encodeURIComponent(searchTerm)}`).pipe(
-      catchError(this.handleError)
-    );
-  }
+ searchProveedores(searchTerm: string): Observable<Proveedor[]> {
+  return this.http.get<Proveedor[]>(this.apiUrl, {
+    params: { search: searchTerm } // Usa el mismo parámetro que espera el backend
+  }).pipe(
+    catchError(this.handleError)
+  );
+}
 
   deleteProveedor(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`).pipe(

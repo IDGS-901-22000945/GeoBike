@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ProveedorService, Proveedor, ProveedorUpdateModel, ProveedorRegistroModel } from '../../../services/cliente/proveedor.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-registros-proveedores',
@@ -185,86 +186,187 @@ export class RegistrosProveedoresComponent implements OnInit {
     this.showAddModal = false;
   }
 
-  saveNewProveedor(): void {
-    if (this.addForm.invalid) {
-      this.markAllAsTouched(this.addForm);
-      return;
+ saveNewProveedor(): void {
+  if (this.addForm.invalid) {
+    this.markAllAsTouched(this.addForm);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Por favor complete todos los campos requeridos correctamente',
+      confirmButtonColor: '#3085d6'
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  const nuevoProveedor: ProveedorRegistroModel = {
+    nombre: this.addForm.value.nombre || '',
+    contacto: this.addForm.value.contacto || '',
+    telefono: this.addForm.value.telefono || '',
+    email: this.addForm.value.email || '',
+    direccion: this.addForm.value.direccion || '',
+    activo: this.addForm.value.activo || true
+  };
+
+  this.proveedorService.createProveedor(nuevoProveedor).subscribe({
+    next: () => {
+      this.showAddModal = false;
+      this.loadProveedores();
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: 'Proveedor creado exitosamente',
+        confirmButtonColor: '#3085d6',
+        timer: 2000,
+        timerProgressBar: true
+      });
+    },
+    error: (error) => {
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: this.getErrorMessage(error, 'crear proveedor'),
+        confirmButtonColor: '#3085d6'
+      });
     }
+  });
+}
 
-    this.isLoading = true;
-    const nuevoProveedor: ProveedorRegistroModel = {
-      nombre: this.addForm.value.nombre || '',
-      contacto: this.addForm.value.contacto || '',
-      telefono: this.addForm.value.telefono || '',
-      email: this.addForm.value.email || '',
-      direccion: this.addForm.value.direccion || '',
-      activo: this.addForm.value.activo || true
-    };
+// Método auxiliar para obtener mensajes de error personalizados
+private getErrorMessage(error: any, action: string): string {
+  if (error.error && error.error.message) {
+    return `Error al ${action}: ${error.error.message}`;
+  }
+  return `Ocurrió un error al ${action}. Por favor intente nuevamente.`;
+}
 
-    this.proveedorService.createProveedor(nuevoProveedor).subscribe({
-      next: () => {
-        this.showAddModal = false;
-        this.loadProveedores();
-        this.showAlert('Proveedor creado exitosamente', 'success');
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.handleError(error, 'crear proveedor');
-        this.isLoading = false;
+editProveedor(proveedor: Proveedor): void {
+  Swal.fire({
+    title: 'Editar Proveedor',
+    html: `¿Deseas editar los datos de <b>${proveedor.nombre}</b>?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, editar',
+    cancelButtonText: 'Cancelar',
+    backdrop: `
+      rgba(0,0,0,0.7)
+      url("/assets/images/edit-icon.png")
+      left top
+      no-repeat
+    `
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.proveedorSeleccionado = proveedor;
+      this.editForm.patchValue({
+        proveedorId: proveedor.proveedorId,
+        nombre: proveedor.nombre,
+        telefono: proveedor.telefono || '',
+        email: proveedor.email || '',
+        direccion: proveedor.direccion || ''
+      });
+      this.showEditModal = true;
+
+      // Feedback visual al abrir el modal
+      Swal.fire({
+        position: 'top-end',
+        icon: 'info',
+        title: 'Modo edición activado',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+  });
+}
+
+ closeEditModal(): void {
+  if (this.editForm.dirty) {
+    Swal.fire({
+      title: '¿Salir sin guardar?',
+      text: 'Tienes cambios sin guardar. ¿Estás seguro de querer cerrar?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.showEditModal = false;
+        this.editForm.reset();
       }
     });
-  }
-
-  // Métodos para el modal de editar
-  editProveedor(proveedor: Proveedor): void {
-    this.proveedorSeleccionado = proveedor;
-    this.editForm.patchValue({
-      proveedorId: proveedor.proveedorId,
-      nombre: proveedor.nombre,
-      contacto: proveedor.contacto || '',
-      telefono: proveedor.telefono || '',
-      email: proveedor.email || '',
-      direccion: proveedor.direccion || ''
-    });
-    this.showEditModal = true;
-  }
-
-  closeEditModal(): void {
+  } else {
     this.showEditModal = false;
   }
+}
 
-  saveProveedor(): void {
-    if (this.editForm.invalid) {
-      this.markAllAsTouched(this.editForm);
-      return;
+saveProveedor(): void {
+  if (this.editForm.invalid) {
+    this.markAllAsTouched(this.editForm);
+    Swal.fire({
+      icon: 'error',
+      title: 'Formulario incompleto',
+      text: 'Por favor complete todos los campos requeridos',
+      confirmButtonColor: '#3085d6'
+    });
+    return;
+  }
+
+  const formValue = this.editForm.value;
+  if (!formValue.proveedorId) {
+    Swal.fire('Error', 'No se pudo identificar el proveedor', 'error');
+    return;
+  }
+
+  this.isLoading = true;
+  const datosActualizacion: ProveedorUpdateModel = {
+    proveedorId: formValue.proveedorId,
+    nombre: formValue.nombre || '',
+    contacto: formValue.contacto || '',
+    telefono: formValue.telefono || '',
+    email: formValue.email || '',
+    direccion: formValue.direccion || ''
+  };
+
+  // Mostrar alerta de carga
+  Swal.fire({
+    title: 'Guardando cambios...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
     }
+  });
 
-    const formValue = this.editForm.value;
-    if (!formValue.proveedorId) return;
-
-    this.isLoading = true;
-    const datosActualizacion: ProveedorUpdateModel = {
-      proveedorId: formValue.proveedorId,
-      nombre: formValue.nombre || '',
-      contacto: formValue.contacto || '',
-      telefono: formValue.telefono || '',
-      email: formValue.email || '',
-      direccion: formValue.direccion || ''
-    };
-
-    this.proveedorService.updateProveedor(datosActualizacion.proveedorId, datosActualizacion).subscribe({
-      next: () => {
+  this.proveedorService.updateProveedor(datosActualizacion.proveedorId, datosActualizacion).subscribe({
+    next: () => {
+      Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: '¡Proveedor actualizado!',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
         this.showEditModal = false;
         this.loadProveedores();
-        this.showAlert('Proveedor actualizado correctamente', 'success');
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.handleError(error, 'actualizar proveedor');
-        this.isLoading = false;
-      }
-    });
-  }
+      });
+      this.isLoading = false;
+    },
+    error: (error) => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: error.error?.message || 'Ocurrió un error al actualizar el proveedor',
+        confirmButtonText: 'Entendido'
+      });
+      this.handleError(error, 'actualizar proveedor');
+      this.isLoading = false;
+    }
+  });
+}
 
   // Métodos auxiliares
   private markAllAsTouched(formGroup: FormGroup): void {
@@ -327,16 +429,66 @@ export class RegistrosProveedoresComponent implements OnInit {
   }
 
   // Métodos para cambiar estado
-  toggleEstado(proveedor: Proveedor): void {
-    const accion = proveedor.activo ? 'desactivar' : 'activar';
-    if (confirm(`¿${accion.toUpperCase()} a ${proveedor.nombre}?`)) {
+ toggleEstado(proveedor: Proveedor): void {
+  const accion = proveedor.activo ? 'desactivar' : 'activar';
+  const estadoFuturo = proveedor.activo ? 'inactivo' : 'activo';
+  const colorBoton = proveedor.activo ? '#d33' : '#28a745'; // Rojo para desactivar, verde para activar
+
+  Swal.fire({
+    title: `¿${accion.toUpperCase()} proveedor?`,
+    html: `Estás a punto de <strong>${accion}</strong> a: <br><br>
+           <b>${proveedor.nombre}</b><br>
+           <small>ID: ${proveedor.proveedorId}</small>`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: colorBoton,
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: `Sí, ${accion}`,
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
       this.isLoading = true;
+
+      // Mostrar loader mientras se procesa
+      Swal.fire({
+        title: 'Procesando...',
+        html: `Por favor espera mientras se ${accion} el proveedor`,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       this.proveedorService.toggleActivo(proveedor.proveedorId).subscribe({
-        next: () => this.loadProveedores(),
-        error: (error) => this.handleError(error, `${accion} proveedor`)
+        next: () => {
+          // Cerrar loader y mostrar confirmación
+          Swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: `¡Proveedor ${estadoFuturo.toUpperCase()}!`,
+            showConfirmButton: false,
+            timer: 1500
+          });
+          this.loadProveedores();
+        },
+        error: (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `No se pudo ${accion} el proveedor: ${error.message}`,
+            confirmButtonText: 'Entendido'
+          });
+          this.handleError(error, `${accion} proveedor`);
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
       });
     }
-  }
+  });
+}
+
 
   clearError(): void {
     this.error = null;

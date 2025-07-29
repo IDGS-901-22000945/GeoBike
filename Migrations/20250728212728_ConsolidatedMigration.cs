@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GeoApi.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateMySQL : Migration
+    public partial class ConsolidatedMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

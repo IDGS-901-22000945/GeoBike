@@ -23,8 +23,8 @@ export class ServicioService {
   }
 
   toggleActivo(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/toggle-activo`, null);
-  }
+  return this.http.patch(`${this.apiUrl}/${id}/toggle-activo`, {});
+}
 }
 
 export interface Servicio {

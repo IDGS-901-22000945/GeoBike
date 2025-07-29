@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeoApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250721185209_InitialCreateMySQL")]
-    partial class InitialCreateMySQL
+    [Migration("20250728212728_ConsolidatedMigration")]
+    partial class ConsolidatedMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

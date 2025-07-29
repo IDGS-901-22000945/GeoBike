@@ -6,7 +6,7 @@ namespace GeoApi.Models
         public int UsuarioId { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get; set; }
-        public string Rol { get; set; } // 'cliente', 'empleado', 'administrador'
+        public string Rol { get; set; } // 'cliente', 'empleado'
         public DateTime FechaCreacion { get; set; }
         public bool Activo { get; set; }
 
