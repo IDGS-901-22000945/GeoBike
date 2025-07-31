@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Servicio, ServicioService } from '../../../services/cliente/servicios.service';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { ChangeDetectorRef } from '@angular/core';
+
 
 
 @Component({
@@ -41,7 +43,8 @@ export class ServiciosComponent implements OnInit {
 
   constructor(
     private servicioService: ServicioService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
     this.addForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
@@ -175,20 +178,15 @@ export class ServiciosComponent implements OnInit {
   }
 
  closeEditModal(): void {
-  // Resetear el formulario
   this.editForm.reset();
 
-  // Cerrar el modal
   this.showEditModal = false;
 
-  // Limpiar el servicio en edición
   this.servicioEditando = null;
 
-  // Forzar detección de cambios si es necesario
 }
 
-  // CRUD Operations
- // Helpers (manteniendo tu estructura pero con SweetAlert)
+
 showAlert(message: string, type: 'success' | 'error' | 'info'): void {
   Swal.fire({
     title: message,
@@ -207,7 +205,6 @@ showAlert(message: string, type: 'success' | 'error' | 'info'): void {
   });
 }
 
-// CRUD Operations (estructura original con SweetAlert)
 saveNewServicio(): void {
   if (this.addForm.invalid) return;
 
@@ -231,7 +228,11 @@ saveNewServicio(): void {
 
 saveServicio(): void {
   if (this.editForm.invalid || !this.servicioEditando) {
-    this.showAlert('Formulario inválido', 'error');
+    Swal.fire({
+      icon: 'error',
+      title: 'Formulario inválido',
+      text: 'Por favor, corrige los errores antes de continuar.'
+    });
     return;
   }
 
@@ -240,25 +241,35 @@ saveServicio(): void {
 
   this.servicioService.updateServicio(updatedServicio).subscribe({
     next: (servicio) => {
-      const index = this.servicios.findIndex(s => s.servicioId === servicio.servicioId);
+const index = this.servicios.findIndex(s => s != null && s.servicioId === servicio.servicioId);
       if (index !== -1) {
         this.servicios[index] = servicio;
         this.applyFilters();
       }
-      this.showAlert('Servicio actualizado exitosamente', 'success');
-      this.closeEditModal(); // Asegurar que se cierre el modal
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Servicio actualizado',
+        text: 'El servicio se actualizó exitosamente.'
+      });
+
+      this.closeEditModal();
       this.isLoading = false;
     },
     error: (err) => {
-      this.showAlert(err.message || 'Error al actualizar servicio', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al actualizar',
+        text: err.message || 'Ocurrió un error inesperado.'
+      });
       this.isLoading = false;
-      // No cerramos el modal en error para permitir correcciones
     },
     complete: () => {
-      this.isLoading = false; // Asegurar que loading se desactive siempre
+      this.isLoading = false;
     }
   });
 }
+
 
 async cambiarEstado(servicio: Servicio): Promise<void> {
   if (servicio.servicioId === undefined) return;

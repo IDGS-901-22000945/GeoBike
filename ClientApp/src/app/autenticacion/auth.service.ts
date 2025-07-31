@@ -43,10 +43,11 @@ export class AuthService {
     localStorage.setItem('usuario', JSON.stringify(usuario));
   }
 
-  obtenerUsuario() {
-    const usuario = localStorage.getItem('usuario');
-    return usuario ? JSON.parse(usuario) : null;
-  }
+ obtenerUsuario() {
+  const usuario = localStorage.getItem('usuario');
+  return usuario ? JSON.parse(usuario) : null;
+
+}
 
   obtenerRol(): string | null {
     const usuario = this.obtenerUsuario();

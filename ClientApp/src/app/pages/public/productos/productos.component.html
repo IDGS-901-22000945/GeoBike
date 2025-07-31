@@ -7,9 +7,10 @@
     <div class="flex flex-wrap justify-center gap-6">
       <div *ngFor="let producto of productos"
            class="w-full sm:w-80 md:w-64 bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow flex flex-col min-h-[420px]">
-        <!-- Imagen -->
+
+        <!-- Sin imagen fija, solo espacio para futura imagen si hay -->
         <div class="bg-gray-100 flex items-center justify-center h-28 rounded-t-xl">
-          <img src="assets/img/disp-geobike.png" alt="{{ producto.nombre }}" class="h-20 object-contain" />
+
         </div>
 
         <!-- Contenido -->
@@ -37,10 +38,10 @@
     <div class="flex flex-wrap justify-center gap-6">
       <div *ngFor="let servicio of servicios"
            class="w-full sm:w-80 md:w-64 bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow flex flex-col min-h-[420px]">
-        <!-- Ícono -->
+        <!-- Ícono dinámico basado en tipo o nombre -->
         <div class="flex items-center justify-center h-28">
-          <div class="h-14 w-14 bg-blue-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-cogs text-blue-600 text-lg"></i>
+          <div class="h-14 w-14 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-lg">
+            <i [ngClass]="getServicioIcon(servicio)"></i>
           </div>
         </div>
 

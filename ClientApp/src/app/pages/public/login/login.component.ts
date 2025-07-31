@@ -32,9 +32,15 @@ export class LoginComponent {
 
     this.authService.login(email!, password!).subscribe({
       next: (usuario) => {
-        const rol = usuario.rol;
+        const { rol, usuarioId, clienteId } = usuario;
         console.log('🔐 Login exitoso. Rol:', rol);
+        console.log('👤 Usuario ID:', usuarioId);
+        console.log('🧾 Cliente ID:', clienteId);
 
+        // Guarda la info del usuario en localStorage
+        localStorage.setItem('usuario', JSON.stringify({ rol, usuarioId, clienteId }));
+
+        // Redirige según el rol
         if (rol === 'cliente') {
           this.router.navigate(['/']);
         } else {
@@ -42,8 +48,8 @@ export class LoginComponent {
         }
       },
       error: (err) => {
-        console.error('❌ Login fallido:', err);
-        this.error = 'Correo o contraseña incorrectos.';
+        this.error = 'Credenciales inválidas';
+        console.error('❌ Error en login:', err);
       }
     });
   }

@@ -39,6 +39,16 @@ namespace GeoApi.Controllers
             if (servicio == null) return NotFound();
             return servicio;
         }
+        // GET: api/servicios/activos
+        [HttpGet("activos")]
+        public async Task<ActionResult<IEnumerable<Servicio>>> GetServiciosActivos()
+        {
+            var serviciosActivos = await _context.Servicios
+                .Where(s => s.Activo)
+                .ToListAsync();
+
+            return serviciosActivos;
+        }
 
         // POST: api/servicios
         [HttpPost]

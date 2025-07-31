@@ -82,6 +82,30 @@ namespace GeoApi.Controllers
             };
         }
 
+        // GET: api/Productos/activos
+            [HttpGet("activos")]
+            public async Task<ActionResult<IEnumerable<ProductoDto>>> GetProductosActivos()
+            {
+                var productos = await _context.Productos
+                    .Where(p => p.Activo)
+                    .Include(p => p.Proveedor)
+                    .Select(producto => new ProductoDto
+                    {
+                        ProductoId = producto.ProductoId,
+                        Nombre = producto.Nombre,
+                        Descripcion = producto.Descripcion,
+                        Precio = producto.Precio,
+                        Stock = producto.Stock,
+                        Activo = producto.Activo,
+                        ProveedorId = producto.ProveedorId,
+                        NombreProveedor = producto.Proveedor != null ? producto.Proveedor.Nombre : null
+                    })
+                    .ToListAsync();
+
+                return productos;
+            }
+
+
         // POST: api/Productos
         [HttpPost]
         public async Task<ActionResult<ProductoDto>> PostProducto(ProductoCreateDto productoDto)

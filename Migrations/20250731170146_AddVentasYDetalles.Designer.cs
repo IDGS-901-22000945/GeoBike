@@ -3,6 +3,7 @@ using System;
 using GeoApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeoApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731170146_AddVentasYDetalles")]
+    partial class AddVentasYDetalles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -293,7 +296,7 @@ namespace GeoApi.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
-                    b.Property<decimal>("PrecioMensual")
+                    b.Property<decimal?>("PrecioMensual")
                         .HasColumnType("decimal(10,2)");
 
                     b.HasKey("ServicioId");
@@ -386,7 +389,7 @@ namespace GeoApi.Migrations
             modelBuilder.Entity("GeoApi.Models.DetallePedido", b =>
                 {
                     b.HasOne("GeoApi.Models.Pedido", "Pedido")
-                        .WithMany("Detalles")
+                        .WithMany()
                         .HasForeignKey("PedidoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -436,7 +439,7 @@ namespace GeoApi.Migrations
             modelBuilder.Entity("GeoApi.Models.Pedido", b =>
                 {
                     b.HasOne("GeoApi.Models.Cliente", "Cliente")
-                        .WithMany("Pedidos")
+                        .WithMany()
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -480,16 +483,6 @@ namespace GeoApi.Migrations
                     b.Navigation("Cliente");
 
                     b.Navigation("Personal");
-                });
-
-            modelBuilder.Entity("GeoApi.Models.Cliente", b =>
-                {
-                    b.Navigation("Pedidos");
-                });
-
-            modelBuilder.Entity("GeoApi.Models.Pedido", b =>
-                {
-                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("GeoApi.Models.Usuario", b =>

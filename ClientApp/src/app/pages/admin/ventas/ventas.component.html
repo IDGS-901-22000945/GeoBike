@@ -1,1 +1,113 @@
-<p>ventas works!</p>
+<!-- Filtros y búsqueda -->
+<div class="mb-6 bg-white p-4 rounded-xl shadow-sm">
+  <div class="flex flex-col md:flex-row items-center gap-4">
+    <select [(ngModel)]="tipoSeleccionado" (change)="cargarItems()"
+            class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
+      <option value="productos">Productos</option>
+      <option value="servicios">Servicios</option>
+    </select>
+
+    <div class="relative flex-grow md:flex-grow-0 md:w-72">
+      <input [(ngModel)]="searchTerm" (input)="filtrarItems()" placeholder="Buscar..."
+             class="border border-gray-300 rounded-lg px-4 py-2 pl-10 w-full focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" />
+      <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Grid de productos/servicios -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
+  <div *ngFor="let item of itemsFiltrados"
+       class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
+    <h3 class="text-lg font-semibold text-gray-800 mb-1">{{item.nombre}}</h3>
+    <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{item.descripcion}}</p>
+    <div class="flex items-center justify-between">
+      <span class="text-xl font-bold text-green-600">${{ getPrecio(item) | number:'1.2-2' }} MXN</span>
+      <button (click)="agregarAlCarrito(item)"
+              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+        <i class="fas fa-cart-plus"></i>
+        <span>Agregar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Panel de venta -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+  <div class="bg-gray-800 text-white px-6 py-4">
+    <h2 class="text-xl font-bold flex items-center gap-2">
+      <i class="fas fa-receipt"></i>
+      <span>Detalle de Venta</span>
+    </h2>
+  </div>
+
+  <div class="p-6">
+    <!-- Tabla de items -->
+    <div class="overflow-x-auto mb-6">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-100 text-gray-700">
+            <th class="p-3 text-left font-medium rounded-tl-lg">Producto/Servicio</th>
+            <th class="p-3 text-center font-medium">Cant.</th>
+            <th class="p-3 text-right font-medium">Precio</th>
+            <th class="p-3 text-right font-medium">Subtotal</th>
+            <th class="p-3 text-right font-medium rounded-tr-lg">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of carrito" class="border-b border-gray-200 hover:bg-gray-50">
+            <td class="p-3">{{item.nombre}}</td>
+            <td class="p-3 text-center">{{item.cantidad}}</td>
+            <td class="p-3 text-right">${{item.precioMostrar | number:'1.2-2'}}</td>
+            <td class="p-3 text-right">${{item.subtotal | number:'1.2-2'}}</td>
+            <td class="p-3 text-right">
+              <button (click)="eliminarDelCarrito(item)"
+                      class="text-red-500 hover:text-red-700 transition p-1 rounded-full hover:bg-red-50">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="carrito.length === 0">
+            <td colspan="5" class="text-center p-6 text-gray-500 italic">
+              No hay productos o servicios agregados
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Total -->
+    <div class="flex justify-between items-center mb-6 p-3 bg-gray-50 rounded-lg">
+      <span class="text-lg font-medium text-gray-700">Total:</span>
+      <span class="text-2xl font-bold text-green-600">${{ total | number:'1.2-2' }}</span>
+    </div>
+
+    <!-- Monto recibido y cambio -->
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="block mb-2 font-medium text-gray-700">Monto Recibido</label>
+        <div class="relative">
+          <span class="absolute left-3 top-3 text-gray-500">$</span>
+          <input [(ngModel)]="montoRecibido" (input)="calcularCambio()"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 pl-8 text-right focus:ring-2 focus:ring-green-500"
+                type="number" min="0" placeholder="0.00" />
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center p-3 rounded-lg"
+           [class.bg-green-100]="cambio >= 0" [class.bg-red-100]="cambio < 0">
+        <span class="font-medium text-gray-700">Cambio:</span>
+        <span [class.text-red-600]="cambio < 0" [class.text-green-600]="cambio >= 0"
+              class="text-xl font-bold">${{ cambio | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <!-- Botón de pago -->
+    <button (click)="procesarVenta()"
+            [disabled]="cambio < 0 || carrito.length === 0"
+            class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition flex items-center justify-center gap-2">
+      <i class="fas fa-cash-register"></i>
+      <span>Procesar Pago</span>
+    </button>
+  </div>
+</div>

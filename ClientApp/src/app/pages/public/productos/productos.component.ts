@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Producto, ProductoService } from '../../../services/cliente/producto.service';
-import { Servicio, ServicioService } from '../../../services/cliente/servicios.service'; 
+import { Servicio, ServicioService } from '../../../services/cliente/servicios.service';
 import { CarritoService } from '../../../services/cliente/carrito.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-productos',
@@ -40,14 +41,46 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  agregarAlCarrito(producto: Producto) {
-    this.carritoService.agregarProducto(producto);
-    alert(`"${producto.nombre}" agregado al carrito`);
-  }
+  getServicioIcon(servicio: any): string {
+  // Puedes basarte en nombre o en algún campo tipo para asignar iconos distintos
+  if (!servicio) return 'fas fa-cogs'; // ícono default
 
-  agregarServicioAlCarrito(servicio: Servicio) {
-    this.carritoService.agregarServicio(servicio);
-    alert(`"${servicio.nombre}" agregado al carrito`);
-  }
+  const nombre = servicio.nombre.toLowerCase();
+
+  if (nombre.includes('mantenimiento')) return 'fas fa-tools';
+  if (nombre.includes('soporte')) return 'fas fa-headset';
+  if (nombre.includes('consultoría')) return 'fas fa-briefcase';
+  if (nombre.includes('entrenamiento')) return 'fas fa-chalkboard-teacher';
+
+  return 'fas fa-cogs'; // default
+}
+
+
+ agregarAlCarrito(producto: Producto) {
+  this.carritoService.agregarProducto(producto);
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: `"${producto.nombre}" agregado al carrito`,
+    showConfirmButton: false,
+    timer: 1500,
+    timerProgressBar: true,
+  });
+}
+
+agregarServicioAlCarrito(servicio: Servicio) {
+  this.carritoService.agregarServicio(servicio);
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: `"${servicio.nombre}" agregado al carrito`,
+    showConfirmButton: false,
+    timer: 1500,
+    timerProgressBar: true,
+  });
+}
+
 
 }

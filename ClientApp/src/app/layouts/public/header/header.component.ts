@@ -13,6 +13,17 @@ import { AuthService } from '../../../autenticacion/auth.service';
 export class HeaderComponent {
   constructor(public authService: AuthService) {}
 
+  showUserMenu = false;
+  usuarioNombre = "C Liente";
+
+  toggleUserMenu() {
+    this.showUserMenu = !this.showUserMenu;
+  }
+
+  getInitials(name: string): string {
+    return name.split(' ').map(part => part[0]).join('').toUpperCase();
+  }
+
   logout() {
     this.authService.logout();
   }

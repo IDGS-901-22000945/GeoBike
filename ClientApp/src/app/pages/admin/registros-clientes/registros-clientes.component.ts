@@ -266,7 +266,6 @@ toggleEstado(cliente: Cliente): void {
 
   // Abrir modal de edición
 editCliente(cliente: Cliente): void {
-  // Mostrar confirmación antes de editar
   Swal.fire({
     title: '¿Editar cliente?',
     text: `Vas a editar los datos de ${cliente.nombre} ${cliente.apellidoPaterno}`,
@@ -294,45 +293,59 @@ editCliente(cliente: Cliente): void {
 }
 
   // Guardar cambios del cliente
- saveCliente(): void {
+saveCliente(): void {
   if (this.editForm.clienteId) {
-    const Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer);
-        toast.addEventListener('mouseleave', Swal.resumeTimer);
-      }
-    });
-
-    Toast.fire({
-      icon: 'info',
-      title: 'Guardando cambios...'
-    });
-
-    this.clienteService.updateCliente(this.editForm.clienteId, this.editForm).subscribe({
-      next: (response) => {
-        Toast.fire({
-          icon: 'success',
-          title: 'Cliente actualizado'
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas guardar los cambios?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, guardar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+          }
         });
-        this.showEditModal = false;
-        this.loadClientes();
-      },
-      error: (error) => {
+
         Toast.fire({
-          icon: 'error',
-          title: 'Error al guardar'
+          icon: 'info',
+          title: 'Guardando cambios...'
         });
-        this.handleError(error, 'actualizar cliente');
-        this.showEditModal = false;
+
+        this.clienteService.updateCliente(this.editForm.clienteId, this.editForm).subscribe({
+          next: (response) => {
+            Toast.fire({
+              icon: 'success',
+              title: 'Cliente actualizado'
+            });
+            this.showEditModal = false;
+            this.loadClientes();
+          },
+          error: (error) => {
+            Toast.fire({
+              icon: 'error',
+              title: 'Error al guardar'
+            });
+            this.handleError(error, 'actualizar cliente');
+            this.showEditModal = false;
+          }
+        });
       }
     });
   }
 }
+
 
   // Cerrar modal
   closeModal(): void {

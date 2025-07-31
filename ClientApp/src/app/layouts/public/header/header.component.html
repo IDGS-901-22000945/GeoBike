@@ -1,23 +1,66 @@
 <nav class="bg-white shadow-lg fixed w-full z-50 border-b border-gray-200">
   <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-    <a routerLink="/" class="text-xl font-bold text-blue-600 flex items-center">
-      <i class="fas fa-satellite-dish text-blue-500 mr-2"></i>
+
+    <!-- Logo (igual que tu versión original) -->
+    <a routerLink="/" class="text-xl font-bold text-blue-600 flex items-center hover:text-blue-700 transition-colors">
+      <i class="fas fa-satellite-dish text-blue-500 mr-2 text-xl"></i>
       <span>GeoBike Shield</span>
     </a>
+
+    <!-- Menú derecho (misma lógica, mejor organizado) -->
     <div class="flex items-center space-x-6">
+
+      <!-- Enlaces principales (condicional como en tu original) -->
       <ul class="flex space-x-6">
+        <!-- Nosotros - Solo visible cuando NO hay sesión -->
         <li *ngIf="!usuarioLogueado">
-          <a routerLink="/login" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Inicia Sesión</a>
+          <a routerLink="/nosotros" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Nosotros</a>
         </li>
-        <li *ngIf="usuarioLogueado">
-          <button (click)="logout()" class="text-gray-700 hover:text-red-500 font-medium transition-colors">Cerrar Sesión</button>
+
+        <!-- Productos - Siempre visible -->
+        <li>
+          <a routerLink="/productos" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">Productos</a>
         </li>
-        <li><a routerLink="/nosotros" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Nosotros</a></li>
-        <li><a routerLink="/productos" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Productos</a></li>
       </ul>
-      <a routerLink="/carrito" class="text-gray-700 hover:text-blue-600 transition-colors">
+
+      <!-- Carrito (igual que tu original) -->
+      <a routerLink="/carrito" class="text-gray-700 hover:text-blue-600 transition-colors duration-200 relative">
         <i class="fas fa-shopping-cart text-xl"></i>
+
       </a>
+
+      <!-- Menú usuario (versión mejorada pero con tu lógica) -->
+      <div class="relative">
+        <!-- Cuando NO hay sesión (igual que tu original) -->
+        <a *ngIf="!usuarioLogueado"
+           routerLink="/login"
+           class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+          Iniciar Sesión
+        </a>
+
+        <!-- Cuando HAY sesión (nuevo dropdown con tu misma lógica) -->
+        <div *ngIf="usuarioLogueado" class="relative">
+          <!-- Botón del avatar -->
+          <button (click)="toggleUserMenu()" class="flex items-center space-x-1 focus:outline-none">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+              {{ getInitials(usuarioNombre) }} <!-- Función que puedes implementar en tu componente -->
+            </div>
+          </button>
+
+          <!-- Menú desplegable (usa *ngIf en lugar de Alpine.js) -->
+          <div *ngIf="showUserMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+            <a routerLink="/mis-pedidos"
+               class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
+               (click)="showUserMenu = false">
+              Mis pedidos
+            </a>
+            <button (click)="logout()"
+                    class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200">
+              Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </nav>

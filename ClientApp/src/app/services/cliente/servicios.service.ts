@@ -31,6 +31,6 @@ export interface Servicio {
   servicioId: number;
   nombre: string;
   descripcion?: string;
-  precioMensual?: number;
+  precioMensual: number;
   activo: boolean;
 }

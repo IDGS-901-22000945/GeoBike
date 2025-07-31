@@ -3,6 +3,9 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Producto, ProductoService } from '../../../services/cliente/producto.service';
 import { Proveedor, ProveedorService } from '../../../services/cliente/proveedor.service';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef } from '@angular/core';
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-admin-productos',
@@ -42,7 +45,9 @@ export class AdminProductosComponent implements OnInit {
   constructor(
     private productoService: ProductoService,
     private proveedorService: ProveedorService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef // en tu constructor
+
   ) {
     this.addForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
@@ -202,50 +207,88 @@ export class AdminProductosComponent implements OnInit {
   }
 
   // CRUD Operations
-  saveNewProducto(): void {
-    if (this.addForm.invalid) return;
+saveNewProducto(): void {
+  if (this.addForm.invalid) return;
 
-    this.isLoading = true;
-    const newProducto = this.addForm.value;
+  this.isLoading = true;
+  const newProducto = this.addForm.value;
 
-    this.productoService.createProducto(newProducto).subscribe({
-      next: (producto) => {
-        this.productos.unshift(producto);
-        this.applyFilters();
-        this.showAddModal = false;
-        this.showAlert('Producto creado exitosamente', 'success');
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.error = err.message || 'Error al crear producto';
-        this.isLoading = false;
+  this.productoService.createProducto(newProducto).subscribe({
+    next: (producto) => {
+      this.productos.unshift(producto);
+      this.applyFilters();
+      this.showAddModal = false;
+      this.isLoading = false;
+      console.log('Producto enviado:', newProducto);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Producto creado',
+        text: 'El producto ha sido creado exitosamente.'
+      });
+    },
+    error: (err) => {
+      this.isLoading = false;
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al crear producto',
+        text: err.error?.message || 'Ocurrió un error inesperado.'
+      });
+    }
+  });
+}
+
+
+saveProducto(): void {
+  if (this.productoEditando) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas guardar los cambios?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, guardar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        const productoActualizado: Producto = {
+          ...this.productoEditando,
+          ...this.editForm.value
+        };
+
+        this.productoService.updateProducto(productoActualizado).subscribe({
+          next: () => {
+            this.cargarProductos(); // Recarga la tabla
+            Swal.fire({
+              icon: 'success',
+              title: 'Producto actualizado',
+              text: 'El producto ha sido actualizado exitosamente',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              this.closeEditModal();      // Cierra el modal
+              this.cdr.detectChanges();   // Fuerza actualización del DOM
+            });
+          },
+          error: (error) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: String(error || 'Error desconocido'),
+              confirmButtonText: 'Aceptar'
+            }).then(() => {
+              this.closeEditModal();      // Aun si hay error, cerramos el modal
+              this.cdr.detectChanges();   // Refresca DOM
+            });
+          }
+        });
       }
     });
   }
+}
 
-  saveProducto(): void {
-    if (this.editForm.invalid || !this.productoEditando) return;
 
-    this.isLoading = true;
-    const updatedProducto = { ...this.productoEditando, ...this.editForm.value };
 
-    this.productoService.updateProducto(updatedProducto).subscribe({
-      next: (producto) => {
-        const index = this.productos.findIndex(p => p.productoId === producto.productoId);
-        if (index !== -1) {
-          this.productos[index] = producto;
-          this.applyFilters();
-        }
-        this.showEditModal = false;
-        this.showAlert('Producto actualizado exitosamente', 'success');
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.error = err.message || 'Error al actualizar producto';
-        this.isLoading = false;
-      }
-    });
-  }
 
   cambiarEstado(producto: Producto): void {
     if (producto.productoId === undefined) return;

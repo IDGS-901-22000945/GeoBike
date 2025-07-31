@@ -26,6 +26,8 @@ namespace GeoApi.Models
         public string Telefono { get; set; }
 
         public Usuario Usuario { get; set; }
+        public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+
     }
 
     public class Personal
@@ -72,7 +74,7 @@ namespace GeoApi.Models
         public int ServicioId { get; set; }
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
-        public decimal? PrecioMensual { get; set; }
+        public decimal PrecioMensual { get; set; }
         public bool Activo { get; set; }
     }
 
@@ -85,6 +87,7 @@ namespace GeoApi.Models
         public decimal Total { get; set; }
 
         public Cliente Cliente { get; set; }
+        public ICollection<DetallePedido> Detalles { get; set; } = new List<DetallePedido>(); // Inicializa la colección
     }
 
     public class DetallePedido
@@ -103,4 +106,39 @@ namespace GeoApi.Models
         public Producto Producto { get; set; }
         public Servicio Servicio { get; set; }
     }
+
+    public class Venta
+    {
+        public int VentaId { get; set; }
+        public DateTime FechaVenta { get; set; }
+        public decimal Total { get; set; }
+        public string TipoVenta { get; set; } // "producto", "servicio", etc.
+
+        // Relación con el cliente o personal (quien la realizó)
+        public int? ClienteId { get; set; }
+        public Cliente Cliente { get; set; }
+
+        public int? PersonalId { get; set; }
+        public Personal Personal { get; set; }
+
+        public List<DetalleVenta> DetallesVenta { get; set; }
+    }
+    public class DetalleVenta
+    {
+        public int DetalleVentaId { get; set; }
+
+        public int VentaId { get; set; }
+        public Venta Venta { get; set; }
+
+        public int? ProductoId { get; set; }
+        public Producto Producto { get; set; }
+
+        public int? ServicioId { get; set; }
+        public Servicio Servicio { get; set; }
+
+        public int Cantidad { get; set; }
+        public decimal PrecioUnitario { get; set; }
+    }
+
+
 }

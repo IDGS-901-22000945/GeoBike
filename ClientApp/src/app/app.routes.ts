@@ -15,6 +15,8 @@ import { RegistrosClientesComponent } from './pages/admin/registros-clientes/reg
 import { RegistrosProveedoresComponent } from './pages/admin/proveedores/proveedores.component';
 import { ServiciosComponent } from './pages/admin/servicios/servicios.component';
 import { RoleGuard } from './autenticacion/role.guard';
+import { DashboardComponent } from './pages/admin/dashboard/dashboard.component';
+import { MisPedidosComponent } from './pages/public/mis-pedidos/mis-pedidos.component';
 
 export const routes: Routes = [
   // --- Sección de Administración ---
@@ -24,7 +26,7 @@ export const routes: Routes = [
     canActivateChild: [RoleGuard],
     data: { roles: ['admin', 'empleado'] },
     children: [
-      { path: '', component: AdminComponent, title: 'Panel de Administración', data: { roles: ['admin', 'empleado'] } },
+      { path: '', component: DashboardComponent, title: 'Panel de Administración', data: { roles: ['admin', 'empleado'] } },
       { path: 'empleados', component: EmpleadosComponent, title: 'Empleados', data: { roles: ['admin', 'empleado'] } },
       { path: 'proveedores', component: RegistrosProveedoresComponent, title: 'Proveedores', data: { roles: ['admin', 'empleado'] } },
       { path: 'productos', component: AdminProductosComponent, title: 'Productos', data: { roles: ['admin', 'empleado'] } },
@@ -68,7 +70,12 @@ export const routes: Routes = [
         path: 'carrito',
         component: CarritoComponent,
         title: 'Carrito'
-      }
+      },
+      {
+          path: 'mis-pedidos',
+          component: MisPedidosComponent,
+          title: 'Mis Pedidos'
+        }
     ]
   },
 

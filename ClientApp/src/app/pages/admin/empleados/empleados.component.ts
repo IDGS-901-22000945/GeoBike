@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { PersonalService, Personal, EmpleadoRegistroModel, EmpleadoUpdateModel } from '../../../services/cliente/empleados.service';
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-registros-personal',
@@ -170,109 +172,160 @@ export class EmpleadosComponent implements OnInit {
   }
 
   saveNewEmpleado(): void {
-    if (this.addForm.invalid) {
-      this.markAllAsTouched(this.addForm);
-      return;
+  if (this.addForm.invalid) {
+    this.markAllAsTouched(this.addForm);
+    Swal.fire({
+      icon: 'warning',
+      title: 'Formulario incompleto',
+      text: 'Por favor completa todos los campos requeridos.',
+    });
+    return;
+  }
+
+  this.isLoading = true;
+
+  const nuevoEmpleado: EmpleadoRegistroModel = {
+    email: this.addForm.value.email || '',
+    password: this.addForm.value.password || '',
+    nombre: this.addForm.value.nombre || '',
+    apellidoPaterno: this.addForm.value.apellidoPaterno || '',
+    apellidoMaterno: this.addForm.value.apellidoMaterno || '',
+    puesto: this.addForm.value.puesto || '',
+    fechaContratacion: this.addForm.value.fechaContratacion || undefined
+  };
+
+  this.empleadoService.registerEmpleado(nuevoEmpleado).subscribe({
+    next: () => {
+      this.showAddModal = false;
+      this.loadEmpleados();
+      Swal.fire({
+        icon: 'success',
+        title: '¡Empleado creado!',
+        text: 'El empleado fue registrado exitosamente.'
+      });
+      this.isLoading = false;
+    },
+    error: (error: any) => {
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al crear empleado',
+        text: 'Ocurrió un problema al registrar el empleado. Intenta de nuevo.'
+      });
+      this.handleError(error, 'crear empleado');
     }
-
-    this.isLoading = true;
-
-    const nuevoEmpleado: EmpleadoRegistroModel = {
-      email: this.addForm.value.email || '',
-      password: this.addForm.value.password || '',
-      nombre: this.addForm.value.nombre || '',
-      apellidoPaterno: this.addForm.value.apellidoPaterno || '',
-      apellidoMaterno: this.addForm.value.apellidoMaterno || '',
-      puesto: this.addForm.value.puesto || '',
-      fechaContratacion: this.addForm.value.fechaContratacion || undefined
-    };
-
-    this.empleadoService.registerEmpleado(nuevoEmpleado).subscribe({
-      next: () => {
-        this.showAddModal = false;
-        this.loadEmpleados();
-        this.showAlert('Empleado creado exitosamente', 'success');
-        this.isLoading = false;
-      },
-      error: (error: any) => {
-        this.handleError(error, 'crear empleado');
-        this.isLoading = false;
-      }
-    });
-  }
+  });
+}
 
 
-  editEmpleado(empleado: Personal): void {
-    this.empleadoSeleccionado = empleado;
-    this.editForm.patchValue({
-      personalId: empleado.personalId ?? 0,
-      usuarioId: empleado.usuarioId ?? 0,
-      nombre: empleado.nombre,
-      apellidoPaterno: empleado.apellidoPaterno,
-      apellidoMaterno: empleado.apellidoMaterno || '',
-      puesto: empleado.puesto,
-      fechaContratacion: empleado.fechaContratacion ?? null,
-      email: empleado.usuario?.email || '',
-      activo: empleado.usuario?.activo ?? true
-    });
-    this.showEditModal = true;
-  }
+editEmpleado(empleado: Personal): void {
+  this.empleadoSeleccionado = empleado;
+  this.editForm.patchValue({
+    personalId: empleado.personalId ?? 0,
+    usuarioId: empleado.usuarioId ?? 0,
+    nombre: empleado.nombre,
+    apellidoPaterno: empleado.apellidoPaterno,
+    apellidoMaterno: empleado.apellidoMaterno || '',
+    puesto: empleado.puesto,
+    fechaContratacion: empleado.fechaContratacion ?? null,
+    email: empleado.usuario?.email || '',
+    activo: empleado.usuario?.activo ?? true
+  });
+  this.showEditModal = true;
+
+  Swal.fire({
+    icon: 'info',
+    title: 'Editar empleado',
+    text: `Editando al empleado: ${empleado.nombre} ${empleado.apellidoPaterno}`,
+    timer: 2000,
+    showConfirmButton: false
+  });
+}
 
   closeEditModal(): void {
     this.showEditModal = false;
   }
 
   saveEmpleado(): void {
-    if (this.editForm.invalid) {
-      this.markAllAsTouched(this.editForm);
-      return;
-    }
-
-    const formValue = this.editForm.value;
-    if (!formValue.personalId || formValue.personalId === 0) return;
-
-    if (!formValue.email?.trim()) {
-      this.showAlert('El email es obligatorio', 'error');
-      this.isLoading = false;
-      return;
-    }
-
-    this.isLoading = true;
-
-    const datosActualizacion: EmpleadoUpdateModel = {
-      personalId: formValue.personalId,
-      email: formValue.email || '', 
-      nombre: formValue.nombre || '',
-      apellidoPaterno: formValue.apellidoPaterno || '',
-      apellidoMaterno: formValue.apellidoMaterno || '',
-      puesto: formValue.puesto || '',
-      fechaContratacion: formValue.fechaContratacion || undefined
-    };
-
-    this.empleadoService.updatePersonal(formValue.personalId, datosActualizacion).subscribe({
-      next: () => {
-        this.showEditModal = false;
-        this.loadEmpleados();
-        this.showAlert('Empleado actualizado correctamente', 'success');
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.handleError(error, 'actualizar empleado');
-        this.isLoading = false;
-      }
+  if (this.editForm.invalid) {
+    this.markAllAsTouched(this.editForm);
+    Swal.fire({
+      icon: 'warning',
+      title: 'Formulario inválido',
+      text: 'Por favor completa todos los campos obligatorios.'
     });
+    return;
   }
 
+  const formValue = this.editForm.value;
+  if (!formValue.personalId || formValue.personalId === 0) return;
 
-  toggleEstado(empleado: Personal): void {
-    if (empleado.personalId === undefined) {
-      this.showAlert('Empleado sin ID, no se puede cambiar estado', 'error');
-      return;
+  if (!formValue.email?.trim()) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Email obligatorio',
+      text: 'El email es un campo requerido.'
+    });
+    this.isLoading = false;
+    return;
+  }
+
+  this.isLoading = true;
+
+  const datosActualizacion: EmpleadoUpdateModel = {
+    personalId: formValue.personalId,
+    email: formValue.email || '',
+    nombre: formValue.nombre || '',
+    apellidoPaterno: formValue.apellidoPaterno || '',
+    apellidoMaterno: formValue.apellidoMaterno || '',
+    puesto: formValue.puesto || '',
+    fechaContratacion: formValue.fechaContratacion || undefined
+  };
+
+  this.empleadoService.updatePersonal(formValue.personalId, datosActualizacion).subscribe({
+    next: () => {
+      this.showEditModal = false;
+      this.loadEmpleados();
+      Swal.fire({
+        icon: 'success',
+        title: 'Empleado actualizado',
+        text: 'Los datos del empleado fueron actualizados correctamente.'
+      });
+      this.isLoading = false;
+    },
+    error: (error) => {
+      this.isLoading = false;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al actualizar',
+        text: 'No se pudo actualizar el empleado. Intenta de nuevo.'
+      });
+      this.handleError(error, 'actualizar empleado');
     }
+  });
+}
 
-    const accion = empleado.usuario?.activo ? 'desactivar' : 'activar';
 
-    if (confirm(`¿Está seguro de que desea ${accion} a ${empleado.nombre}?`)) {
+ toggleEstado(empleado: Personal): void {
+  if (empleado.personalId === undefined) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Empleado sin ID, no se puede cambiar estado'
+    });
+    return;
+  }
+
+  const accion = empleado.usuario?.activo ? 'desactivar' : 'activar';
+
+  Swal.fire({
+    title: `¿Está seguro de que desea ${accion} a ${empleado.nombre}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: `Sí, ${accion}`,
+    cancelButtonText: 'Cancelar'
+  }).then(result => {
+    if (result.isConfirmed) {
       this.isLoading = true;
       console.log(`🔄 Cambiando estado de empleado ${empleado.personalId} a ${accion}`);
 
@@ -280,26 +333,31 @@ export class EmpleadosComponent implements OnInit {
         next: (response) => {
           console.log('✅ Estado cambiado exitosamente:', response);
 
-          // ✅ Reflejar cambio inmediatamente en la UI
           if (empleado.usuario) {
             empleado.usuario.activo = response.nuevoEstado;
           }
 
-          // ✅ Mostrar alerta al usuario
-          this.showAlert(`Empleado ${accion} correctamente`, 'success');
+          Swal.fire({
+            icon: 'success',
+            title: `Estado cambiado exitosamente`
+          });
 
-          // 🔄 Recargar toda la lista (por si otros datos también cambiaron)
           this.loadEmpleados();
-
           this.isLoading = false;
         },
         error: (error) => {
-          this.handleError(error, `${accion} empleado`);
           this.isLoading = false;
+          Swal.fire({
+            icon: 'error',
+            title: `Error al ${accion} empleado`,
+            text: 'No se pudo completar la acción. Intenta de nuevo.'
+          });
+          this.handleError(error, `${accion} empleado`);
         }
       });
     }
-  }
+  });
+}
 
   markAllAsTouched(formGroup: FormGroup): void {
     Object.values(formGroup.controls).forEach(c => c.markAsTouched());
