@@ -4,31 +4,35 @@
   <div class="max-w-7xl mx-auto mb-20 px-4">
     <h2 class="text-3xl font-bold text-center text-blue-600 mb-10">Nuestros Productos</h2>
 
-    <div class="flex flex-wrap justify-center gap-6">
-      <div *ngFor="let producto of productos"
-           class="w-full sm:w-80 md:w-64 bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow flex flex-col min-h-[420px]">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+  <div *ngFor="let producto of productos"
+       class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition duration-300 flex flex-col">
 
-        <!-- Sin imagen fija, solo espacio para futura imagen si hay -->
-        <div class="bg-gray-100 flex items-center justify-center h-28 rounded-t-xl">
-
-        </div>
-
-        <!-- Contenido -->
-        <div class="flex-1 flex flex-col justify-between px-4 py-3">
-          <div>
-            <h3 class="text-lg font-bold text-center text-gray-800 mb-2 truncate">{{ producto.nombre }}</h3>
-            <p class="text-sm text-gray-600 text-center mb-3 line-clamp-2">{{ producto.descripcion }}</p>
-            <p class="text-base font-bold text-center text-blue-600 mb-4">${{ producto.precio | number:'1.2-2' }}</p>
-          </div>
-
-          <!-- Botón -->
-          <button (click)="agregarAlCarrito(producto)"
-            class="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-medium py-2 rounded-lg transition duration-300">
-            Comprar
-          </button>
-        </div>
-      </div>
+    <!-- Imagen ajustada -->
+    <div class="h-36 bg-gray-100 flex items-center justify-center overflow-hidden">
+      <img *ngIf="producto.imagenBase64"
+           [src]="producto.imagenBase64"
+           alt="{{ producto.nombre }}"
+           class="object-cover h-full w-full" />
+      <div *ngIf="!producto.imagenBase64"
+           class="text-gray-400 italic text-sm text-center p-4">Sin imagen</div>
     </div>
+
+    <!-- Contenido -->
+    <div class="flex flex-col justify-between p-4 flex-grow">
+      <h3 class="text-base font-semibold text-gray-800 truncate">{{ producto.nombre }}</h3>
+      <p class="text-sm text-gray-600 line-clamp-2 mb-2">{{ producto.descripcion }}</p>
+      <p class="text-lg font-bold text-blue-600 mb-3">${{ producto.precio | number:'1.2-2' }}</p>
+
+      <button (click)="agregarAlCarrito(producto)"
+              class="bg-blue-600 text-white text-sm py-2 rounded-md hover:bg-blue-700 transition w-full">
+        Comprar
+      </button>
+    </div>
+  </div>
+</div>
+
+
   </div>
 
   <!-- Servicios -->

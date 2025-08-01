@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using GeoApi.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GeoApi.Data;
 
 namespace GeoApi.Controllers
@@ -33,7 +31,8 @@ namespace GeoApi.Controllers
             public int Stock { get; set; }
             public bool Activo { get; set; }
             public int? ProveedorId { get; set; }
-            public string NombreProveedor { get; set; } 
+            public string NombreProveedor { get; set; }
+            public string ImagenBase64 { get; set; } // NUEVO
         }
 
         // GET: api/Productos
@@ -41,7 +40,7 @@ namespace GeoApi.Controllers
         public async Task<ActionResult<IEnumerable<ProductoDto>>> GetProductos()
         {
             return await _context.Productos
-                .Include(p => p.Proveedor) 
+                .Include(p => p.Proveedor)
                 .Select(p => new ProductoDto
                 {
                     ProductoId = p.ProductoId,
@@ -51,7 +50,8 @@ namespace GeoApi.Controllers
                     Stock = p.Stock,
                     Activo = p.Activo,
                     ProveedorId = p.ProveedorId,
-                    NombreProveedor = p.Proveedor != null ? p.Proveedor.Nombre : null
+                    NombreProveedor = p.Proveedor != null ? p.Proveedor.Nombre : null,
+                    ImagenBase64 = p.ImagenBase64
                 })
                 .ToListAsync();
         }
@@ -78,33 +78,34 @@ namespace GeoApi.Controllers
                 Stock = producto.Stock,
                 Activo = producto.Activo,
                 ProveedorId = producto.ProveedorId,
-                NombreProveedor = producto.Proveedor != null ? producto.Proveedor.Nombre : null
+                NombreProveedor = producto.Proveedor != null ? producto.Proveedor.Nombre : null,
+                ImagenBase64 = producto.ImagenBase64
             };
         }
 
         // GET: api/Productos/activos
-            [HttpGet("activos")]
-            public async Task<ActionResult<IEnumerable<ProductoDto>>> GetProductosActivos()
-            {
-                var productos = await _context.Productos
-                    .Where(p => p.Activo)
-                    .Include(p => p.Proveedor)
-                    .Select(producto => new ProductoDto
-                    {
-                        ProductoId = producto.ProductoId,
-                        Nombre = producto.Nombre,
-                        Descripcion = producto.Descripcion,
-                        Precio = producto.Precio,
-                        Stock = producto.Stock,
-                        Activo = producto.Activo,
-                        ProveedorId = producto.ProveedorId,
-                        NombreProveedor = producto.Proveedor != null ? producto.Proveedor.Nombre : null
-                    })
-                    .ToListAsync();
+        [HttpGet("activos")]
+        public async Task<ActionResult<IEnumerable<ProductoDto>>> GetProductosActivos()
+        {
+            var productos = await _context.Productos
+                .Where(p => p.Activo)
+                .Include(p => p.Proveedor)
+                .Select(producto => new ProductoDto
+                {
+                    ProductoId = producto.ProductoId,
+                    Nombre = producto.Nombre,
+                    Descripcion = producto.Descripcion,
+                    Precio = producto.Precio,
+                    Stock = producto.Stock,
+                    Activo = producto.Activo,
+                    ProveedorId = producto.ProveedorId,
+                    NombreProveedor = producto.Proveedor != null ? producto.Proveedor.Nombre : null,
+                    ImagenBase64 = producto.ImagenBase64
+                })
+                .ToListAsync();
 
-                return productos;
-            }
-
+            return productos;
+        }
 
         // POST: api/Productos
         [HttpPost]
@@ -117,13 +118,14 @@ namespace GeoApi.Controllers
                 Precio = productoDto.Precio,
                 Stock = productoDto.Stock,
                 Activo = productoDto.Activo,
-                ProveedorId = productoDto.ProveedorId
+                ProveedorId = productoDto.ProveedorId,
+                ImagenBase64 = productoDto.ImagenBase64
             };
 
             _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProducto", new { id = producto.ProductoId }, 
+            return CreatedAtAction("GetProducto", new { id = producto.ProductoId },
                 new ProductoDto
                 {
                     ProductoId = producto.ProductoId,
@@ -132,7 +134,9 @@ namespace GeoApi.Controllers
                     Precio = producto.Precio,
                     Stock = producto.Stock,
                     Activo = producto.Activo,
-                    ProveedorId = producto.ProveedorId
+                    ProveedorId = producto.ProveedorId,
+                    NombreProveedor = producto.Proveedor != null ? producto.Proveedor.Nombre : null,
+                    ImagenBase64 = producto.ImagenBase64
                 });
         }
 
@@ -157,6 +161,7 @@ namespace GeoApi.Controllers
             producto.Stock = productoDto.Stock;
             producto.Activo = productoDto.Activo;
             producto.ProveedorId = productoDto.ProveedorId;
+            producto.ImagenBase64 = productoDto.ImagenBase64;
 
             try
             {
@@ -218,8 +223,10 @@ namespace GeoApi.Controllers
         public int Stock { get; set; }
 
         public bool Activo { get; set; } = true;
-        
+
         public int? ProveedorId { get; set; }
+
+        public string ImagenBase64 { get; set; } // NUEVO
     }
 
     public class ProductoUpdateDto
@@ -243,7 +250,9 @@ namespace GeoApi.Controllers
         public int Stock { get; set; }
 
         public bool Activo { get; set; }
-        
+
         public int? ProveedorId { get; set; }
+
+        public string ImagenBase64 { get; set; } // NUEVO
     }
 }

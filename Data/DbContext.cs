@@ -95,22 +95,25 @@ namespace GeoApi.Data
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
-            // Configuración de Producto
-            modelBuilder.Entity<Producto>(entity =>
-            {
-                entity.HasKey(e => e.ProductoId);
-                entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.Descripcion).HasColumnType("text");
-                entity.Property(e => e.Precio).HasColumnType("decimal(10,2)");
-                entity.Property(e => e.Stock).HasDefaultValue(0);
-                entity.Property(e => e.Activo).HasDefaultValue(true);
+                      // Configuración de Producto
+                    modelBuilder.Entity<Producto>(entity =>
+          {
+              entity.HasKey(e => e.ProductoId);
+              entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
+              entity.Property(e => e.Descripcion).HasColumnType("text");
+              entity.Property(e => e.Precio).HasColumnType("decimal(10,2)");
+              entity.Property(e => e.Stock).HasDefaultValue(0);
+              entity.Property(e => e.Activo).HasDefaultValue(true);
 
-                // Relación con Proveedor
-                entity.HasOne(p => p.Proveedor)
-                    .WithMany()
-                    .HasForeignKey(p => p.ProveedorId)
-                    .OnDelete(DeleteBehavior.SetNull);
-            });
+              // NUEVO: Propiedad de imagen en Base64
+              entity.Property(e => e.ImagenBase64).HasColumnType("longtext");
+
+              // Relación con Proveedor
+              entity.HasOne(p => p.Proveedor)
+                  .WithMany()
+                  .HasForeignKey(p => p.ProveedorId)
+                  .OnDelete(DeleteBehavior.SetNull);
+          });
 
             // Configuración de Servicio
             modelBuilder.Entity<Servicio>(entity =>

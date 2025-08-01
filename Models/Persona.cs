@@ -67,6 +67,8 @@ namespace GeoApi.Models
         // Relación con Proveedor (opcional)
         public int? ProveedorId { get; set; }
         public Proveedor Proveedor { get; set; }
+        public string ImagenBase64 { get; set; }
+
     }
 
     public class Servicio

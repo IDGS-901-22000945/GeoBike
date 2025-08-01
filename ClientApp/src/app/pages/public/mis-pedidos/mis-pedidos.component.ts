@@ -12,7 +12,7 @@ interface DetallePedido {
 
 interface Pedido {
   pedidoId: number;
-  fechaPedido: string; // o Date
+  fechaPedido: string;
   estado: string;
   total: number;
   detalles: DetallePedido[];
@@ -27,8 +27,9 @@ interface Pedido {
 export class MisPedidosComponent implements OnInit {
   pedidos: Pedido[] = [];
   pedidoSeleccionado: Pedido | null = null;
+  mostrarModal: boolean = false;
 
-  clienteId!: number; // <-- Aquí está la declaración que faltaba
+  clienteId!: number;
 
   constructor(private http: HttpClient) {}
 
@@ -39,7 +40,6 @@ export class MisPedidosComponent implements OnInit {
       this.cargarPedidos();
     } else {
       console.error('No se encontró clienteId en usuario logueado');
-      // Aquí podrías redirigir al login o mostrar un mensaje
     }
   }
 
@@ -52,9 +52,16 @@ export class MisPedidosComponent implements OnInit {
 
   verDetalles(pedido: Pedido) {
     this.pedidoSeleccionado = pedido;
+    this.mostrarModal = true;
+    document.body.style.overflow = 'hidden';
   }
 
-  // Método para mostrar clases y colores de estado
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.pedidoSeleccionado = null;
+    document.body.style.overflow = 'auto';
+  }
+
   getEstadoColor(estado: string) {
     switch (estado.toLowerCase()) {
       case 'completado': return 'bg-green-500';

@@ -9,6 +9,7 @@ export interface Producto {
   precio: number;
   stock: number;
   activo: boolean;
+  imagenBase64?: string; // NUEVO CAMPO
   proveedorId?: number;
   proveedor?: {
     proveedorId: number;
