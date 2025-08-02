@@ -189,30 +189,62 @@ namespace GeoApi.Controllers
             });
         }
 
+        // GET: api/pedidos
+[HttpGet]
+public async Task<ActionResult<IEnumerable<PedidoDto>>> GetTodosPedidos()
+{
+    try
+    {
+        var pedidos = await _context.Pedidos
+            .Include(p => p.Detalles)
+            .ThenInclude(d => d.Producto)
+            .Include(p => p.Detalles)
+            .ThenInclude(d => d.Servicio)
+            .OrderByDescending(p => p.FechaPedido)
+            .Select(p => new PedidoDto
+            {
+                PedidoId = p.PedidoId,
+                FechaPedido = p.FechaPedido,
+                Estado = p.Estado,
+                Total = p.Total,
+                Detalles = p.Detalles.Select(d => new DetallePedidoDto
+                {
+                    Nombre = d.Producto != null ? d.Producto.Nombre : d.Servicio.Nombre,
+                    Tipo = d.Producto != null ? "Producto" : "Servicio",
+                    Cantidad = d.Cantidad,
+                    PrecioUnitario = d.PrecioUnitario
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return Ok(pedidos);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error obteniendo todos los pedidos");
+        return StatusCode(500, "Error interno al obtener pedidos");
+    }
+}
+
+
         // PUT: api/pedidos/{id}/estado
-        [HttpPut("{id}/estado")]
-        public async Task<IActionResult> ActualizarEstado(int id, [FromBody] ActualizarEstadoDto estadoDto)
-        {
-            var pedido = await _context.Pedidos.FindAsync(id);
-            if (pedido == null)
-            {
-                return NotFound();
-            }
+    [HttpPut("{id}/estado")]
+public IActionResult ActualizarEstado(int id, [FromBody] ActualizarEstadoDto dto)
+{
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
-            // Validar transición de estado
-            var estadosValidos = new[] { "pendiente", "procesando", "completado", "cancelado" };
-            if (!estadosValidos.Contains(estadoDto.Estado.ToLower()))
-            {
-                return BadRequest("Estado no válido");
-            }
+    var pedido = _context.Pedidos.Find(id);
+    if (pedido == null)
+        return NotFound();
 
-            pedido.Estado = estadoDto.Estado;
-            await _context.SaveChangesAsync();
+    pedido.Estado = dto.Estado;
+    _context.SaveChanges();
 
-            return NoContent();
-        }
+    return NoContent();
+}
 
-        // DTOs para las solicitudes y respuestas
+
         public class PedidoDto
         {
             public int PedidoId { get; set; }
@@ -243,7 +275,7 @@ namespace GeoApi.Controllers
         public class PedidoItemDto
         {
             [Required]
-            public string Tipo { get; set; } // "producto" o "servicio"
+            public string Tipo { get; set; }
 
             [Required]
             public int ItemId { get; set; }

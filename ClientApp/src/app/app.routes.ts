@@ -17,6 +17,7 @@ import { ServiciosComponent } from './pages/admin/servicios/servicios.component'
 import { RoleGuard } from './autenticacion/role.guard';
 import { DashboardComponent } from './pages/admin/dashboard/dashboard.component';
 import { MisPedidosComponent } from './pages/public/mis-pedidos/mis-pedidos.component';
+import { PedidosClienteComponent } from './pages/admin/pedidos-cliente/pedidos-cliente.component';
 
 export const routes: Routes = [
   // --- Sección de Administración ---
@@ -32,7 +33,9 @@ export const routes: Routes = [
       { path: 'productos', component: AdminProductosComponent, title: 'Productos', data: { roles: ['admin', 'empleado'] } },
       { path: 'ventas', component: VentasComponent, title: 'Ventas', data: { roles: ['admin', 'empleado'] } },
       { path: 'registros-clientes', component: RegistrosClientesComponent, title: 'Clientes', data: { roles: ['admin', 'empleado'] } },
-      { path: 'servicios', component: ServiciosComponent, title: 'Servicios', data: { roles: ['admin', 'empleado'] } }
+      { path: 'servicios', component: ServiciosComponent, title: 'Servicios', data: { roles: ['admin', 'empleado'] }, },
+      { path: 'pedidos', component: PedidosClienteComponent, title: 'Pedidos', data: { roles: ['admin', 'empleado'] } }
+
     ]
   },
 

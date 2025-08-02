@@ -15,6 +15,8 @@ export interface Producto {
     proveedorId: number;
     nombre: string;
   };
+  cliente?: { nombre: string } | null;
+
 }
 
 @Injectable({

@@ -1,1 +1,145 @@
-<p>pedidos-cliente works!</p>
+<div class="p-6 bg-white rounded-lg shadow max-w-screen-xl min-h-[80vh] mx-auto">
+  <!-- Título -->
+  <h1 class="text-3xl font-extrabold text-gray-800 mb-8 text-center md:text-left">Gestión de Pedidos</h1>
+
+  <!-- Tabla de pedidos con scroll horizontal -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-gray-800">
+      <thead class="bg-gray-50 font-semibold text-sm text-gray-500 uppercase tracking-wide">
+        <tr>
+          <th class="px-6 py-3 text-left">ID Pedido</th>
+          <th class="px-6 py-3 text-left">Fecha</th>
+          <th class="px-6 py-3 text-left">Estado</th>
+          <th class="px-6 py-3 text-center">Items</th>
+          <th class="px-6 py-3 text-right">Total</th>
+          <th class="px-6 py-3 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let pedido of pedidosPaginados" class="hover:bg-gray-100 transition-colors">
+          <td class="px-6 py-4 whitespace-nowrap font-medium">#GBS-{{ pedido.pedidoId }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ pedido.fechaPedido | date: 'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span
+              class="px-2 inline-flex text-xs font-semibold rounded-full"
+              [ngClass]="getEstadoColor(pedido.estado)">
+              {{ pedido.estado | titlecase }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-center">{{ pedido.detalles.length }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${{ pedido.total | number: '1.2-2' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-center">
+           <button
+  (click)="verDetalles(pedido)"
+  [attr.aria-label]="'Ver detalles del pedido #GBS-' + pedido.pedidoId"
+  class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded-md transition">
+  <i class="fas fa-eye"></i>
+</button>
+
+          </td>
+        </tr>
+
+        <tr *ngIf="pedidos.length === 0">
+          <td colspan="6" class="px-6 py-8 text-center text-gray-500 font-medium">
+            <i class="fas fa-info-circle mr-2"></i> No hay pedidos registrados.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  <div class="flex justify-between items-center mt-6 text-gray-600 text-sm">
+    <div>
+      Mostrando página {{ paginaActual }} de {{ totalPaginas() }}
+    </div>
+    <div class="space-x-2">
+      <button
+        (click)="cambiarPagina(paginaActual - 1)"
+        [disabled]="paginaActual === 1"
+        class="px-3 py-1 border border-gray-300 rounded-md bg-white hover:bg-gray-50 disabled:opacity-50">
+        &lt; Anterior
+      </button>
+      <button
+        (click)="cambiarPagina(paginaActual + 1)"
+        [disabled]="paginaActual === totalPaginas()"
+        class="px-3 py-1 border border-gray-300 rounded-md bg-white hover:bg-gray-50 disabled:opacity-50">
+        Siguiente &gt;
+      </button>
+    </div>
+  </div>
+</div>
+
+  <!-- Modal de detalles del pedido -->
+  <div *ngIf="mostrarModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div
+      class="bg-white rounded-2xl shadow-xl border border-blue-200 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div class="sticky top-0 bg-white p-6 border-b border-blue-200 flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-blue-800">
+          Detalles del Pedido #GBS-{{ pedidoSeleccionado?.pedidoId }}
+        </h2>
+        <button (click)="cerrarModal()" class="p-2 text-blue-600 hover:bg-blue-100 rounded-full transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="p-6">
+        <div class="mb-4">
+          <p class="font-semibold">Fecha:
+            <span class="font-normal">{{ pedidoSeleccionado?.fechaPedido | date: 'dd/MM/yyyy' }}</span>
+          </p>
+
+          <p class="font-semibold flex items-center gap-2 mt-2">
+            Estado:
+            <select *ngIf="pedidoSeleccionado"
+              [(ngModel)]="pedidoSeleccionado.estado"
+              class="ml-2 px-2 py-1 rounded-lg border border-blue-300 text-blue-800 bg-white focus:outline-none focus:ring focus:ring-blue-200 text-sm"
+            >
+              <option *ngFor="let estado of estadosDisponibles" [value]="estado">{{ estado | titlecase }}</option>
+            </select>
+
+            <button *ngIf="pedidoSeleccionado"
+              (click)="guardarEstado()"
+              class="ml-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition"
+            >
+              Guardar
+            </button>
+          </p>
+        </div>
+
+        <table class="w-full text-left text-blue-800 mt-4">
+          <thead class="border-b border-blue-200 font-semibold">
+            <tr>
+              <th class="p-3">Tipo</th>
+              <th class="p-3">Descripción</th>
+              <th class="p-3 text-center">Cantidad</th>
+              <th class="p-3 text-right">P. Unitario</th>
+              <th class="p-3 text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of pedidoSeleccionado?.detalles" class="border-b border-gray-200">
+              <td class="p-3">
+                <span
+                  class="px-2 py-1 rounded-full text-white text-xs font-semibold"
+                  [ngClass]="item.tipo === 'Producto' ? 'bg-blue-500' : 'bg-green-500'"
+                >
+                  {{ item.tipo }}
+                </span>
+              </td>
+              <td class="p-3 font-medium">{{ item.nombre }}</td>
+              <td class="p-3 text-center">{{ item.cantidad }}</td>
+              <td class="p-3 text-right">${{ item.precioUnitario | number: '1.2-2' }}</td>
+              <td class="p-3 text-right font-semibold">${{ (item.precioUnitario * item.cantidad) | number: '1.2-2' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="p-3 text-right font-bold">Total:</td>
+              <td class="p-3 text-right font-bold text-blue-600">${{ pedidoSeleccionado?.total | number: '1.2-2' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
