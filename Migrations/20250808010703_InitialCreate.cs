@@ -5,7 +5,7 @@
 namespace GeoApi.Migrations
 {
     /// <inheritdoc />
-    public partial class AddImagenBase64ToProducto : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

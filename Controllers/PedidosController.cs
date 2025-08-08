@@ -102,92 +102,108 @@ namespace GeoApi.Controllers
 
 
         // POST: api/pedidos
-        [HttpPost]
-        public async Task<ActionResult<Pedido>> CrearPedido([FromBody] CrearPedidoDto pedidoDto)
+      [HttpPost]
+public async Task<ActionResult<Pedido>> CrearPedido([FromBody] CrearPedidoDto pedidoDto)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+
+    var strategy = _context.Database.CreateExecutionStrategy();
+
+    return await strategy.ExecuteAsync(async () =>
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
         {
-            if (!ModelState.IsValid)
+            // Crear el pedido principal
+            var pedido = new Pedido
             {
-                return BadRequest(ModelState);
-            }
+                ClienteId = pedidoDto.ClienteId,
+                FechaPedido = DateTime.UtcNow,
+                Estado = "pendiente",
+                Total = 0,
+                Detalles = new List<DetallePedido>()
+            };
 
-            var strategy = _context.Database.CreateExecutionStrategy();
+            _context.Pedidos.Add(pedido);
+            await _context.SaveChangesAsync();
 
-            return await strategy.ExecuteAsync(async () =>
+            decimal totalPedido = 0;
+
+            // Procesar cada item del pedido
+            foreach (var item in pedidoDto.Items)
             {
-                using var transaction = await _context.Database.BeginTransactionAsync();
+                decimal precioUnitario = 0;
 
-                try
+                if (item.Tipo == "producto")
                 {
-                    // Crear el pedido principal
-                    var pedido = new Pedido
+                    var producto = await _context.Productos.FindAsync(item.ItemId);
+                    if (producto == null)
                     {
-                        ClienteId = pedidoDto.ClienteId,
-                        FechaPedido = DateTime.UtcNow,
-                        Estado = "pendiente",
-                        Total = 0,
-                        Detalles = new List<DetallePedido>()
-                    };
-
-                    _context.Pedidos.Add(pedido);
-                    await _context.SaveChangesAsync();
-
-                    decimal totalPedido = 0;
-
-                    // Procesar cada item del pedido
-                    foreach (var item in pedidoDto.Items)
-                    {
-                        decimal precioUnitario = 0;
-
-                        if (item.Tipo == "producto")
-                        {
-                            var producto = await _context.Productos.FindAsync(item.ItemId);
-                            if (producto == null)
-                            {
-                                await transaction.RollbackAsync();
-                                return BadRequest($"Producto con ID {item.ItemId} no encontrado");
-                            }
-                            precioUnitario = producto.Precio;
-                        }
-                        else if (item.Tipo == "servicio")
-                        {
-                            var servicio = await _context.Servicios.FindAsync(item.ItemId);
-                            if (servicio == null)
-                            {
-                                await transaction.RollbackAsync();
-                                return BadRequest($"Servicio con ID {item.ItemId} no encontrado");
-                            }
-                            precioUnitario = servicio.PrecioMensual;
-                        }
-
-                        var detalle = new DetallePedido
-                        {
-                            PedidoId = pedido.PedidoId,
-                            ProductoId = item.Tipo == "producto" ? item.ItemId : null,
-                            ServicioId = item.Tipo == "servicio" ? item.ItemId : null,
-                            Cantidad = item.Cantidad,
-                            PrecioUnitario = precioUnitario
-                        };
-
-                        totalPedido += precioUnitario * item.Cantidad;
-                        pedido.Detalles.Add(detalle);
+                        await transaction.RollbackAsync();
+                        return BadRequest($"Producto con ID {item.ItemId} no encontrado");
                     }
 
-                    // Actualizar el total del pedido
-                    pedido.Total = totalPedido;
-                    await _context.SaveChangesAsync();
+                    if (producto.Stock < item.Cantidad)
+                    {
+                        await transaction.RollbackAsync();
+                        return BadRequest($"No hay suficiente stock para el producto {producto.Nombre}. Disponible: {producto.Stock}, solicitado: {item.Cantidad}.");
+                    }
 
-                    await transaction.CommitAsync();
+                    // Descontar stock
+                    producto.Stock -= item.Cantidad;
 
-                    return CreatedAtAction(nameof(GetPedido), new { id = pedido.PedidoId }, pedido);
+                    precioUnitario = producto.Precio;
                 }
-                catch (Exception ex)
+                else if (item.Tipo == "servicio")
+                {
+                    var servicio = await _context.Servicios.FindAsync(item.ItemId);
+                    if (servicio == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return BadRequest($"Servicio con ID {item.ItemId} no encontrado");
+                    }
+                    precioUnitario = servicio.PrecioMensual;
+                }
+                else
                 {
                     await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Error creando pedido");
-                    return StatusCode(500, "Error interno al crear el pedido");
+                    return BadRequest($"Tipo inválido: {item.Tipo}");
                 }
-            });
+
+                var detalle = new DetallePedido
+                {
+                    PedidoId = pedido.PedidoId,
+                    ProductoId = item.Tipo == "producto" ? item.ItemId : null,
+                    ServicioId = item.Tipo == "servicio" ? item.ItemId : null,
+                    Cantidad = item.Cantidad,
+                    PrecioUnitario = precioUnitario
+                };
+
+                totalPedido += precioUnitario * item.Cantidad;
+                pedido.Detalles.Add(detalle);
+            }
+
+            pedido.Total = totalPedido;
+
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return CreatedAtAction(nameof(GetPedido), new { id = pedido.PedidoId }, pedido);
         }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error creando pedido");
+            return StatusCode(500, "Error interno al crear el pedido");
+        }
+    });
+}
+
 
         // GET: api/pedidos
 [HttpGet]

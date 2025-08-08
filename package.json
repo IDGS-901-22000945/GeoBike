@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "chart.js": "^4.4.0",
+    "ng2-charts": "^6.0.0",
     "sweetalert2": "^11.22.2"
   }
 }

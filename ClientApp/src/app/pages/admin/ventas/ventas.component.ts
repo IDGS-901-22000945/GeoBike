@@ -174,42 +174,54 @@ eliminarDelCarrito(item: ItemCarrito): void {
     this.cambio = this.montoRecibido - this.total;
   }
 
-  procesarVenta(): void {
-    if (this.cambio < 0 || this.carrito.length === 0) {
-      alert('Monto recibido insuficiente o carrito vacío');
-      return;
-    }
-
-    // Construir el objeto Venta para enviar al backend
-    const venta: Venta = {
-      total: this.total,
-      tipoVenta: this.carrito[0].tipo, // asumir que solo se vende un tipo en la venta
-      detallesVenta: this.carrito.map(i => ({
-        productoId: i.tipo === 'producto' ? i.id : undefined,
-        servicioId: i.tipo === 'servicio' ? i.id : undefined,
-        cantidad: i.cantidad,
-        precioUnitario: i.precioMostrar
-      }))
-    };
-
-    this.ventaService.crearVenta(venta).subscribe({
-      next: (res) => {
-        alert('Venta procesada con éxito.');
-        this.carrito = [];
-        this.total = 0;
-        this.montoRecibido = 0;
-        this.cambio = 0;
-        this.tipoSeleccionado = 'productos';
-        this.searchTerm = '';
-        this.cargarItems();
-      },
-      error: (err) => {
-        alert('Error al procesar la venta.');
-        console.error(err);
-      }
+procesarVenta(): void {
+  if (this.cambio < 0 || this.carrito.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Atención',
+      text: 'Monto recibido insuficiente o carrito vacío',
+      confirmButtonText: 'Entendido'
     });
-
-
+    return;
   }
+
+  const venta: Venta = {
+    total: this.total,
+    tipoVenta: this.carrito[0].tipo,
+    detallesVenta: this.carrito.map(i => ({
+      productoId: i.tipo === 'producto' ? i.id : undefined,
+      servicioId: i.tipo === 'servicio' ? i.id : undefined,
+      cantidad: i.cantidad,
+      precioUnitario: i.precioMostrar
+    }))
+  };
+
+  this.ventaService.crearVenta(venta).subscribe({
+    next: (res) => {
+      Swal.fire({
+        icon: 'success',
+        title: '¡Venta exitosa!',
+        text: 'La venta ha sido procesada con éxito.',
+        confirmButtonText: 'Aceptar'
+      });
+      this.carrito = [];
+      this.total = 0;
+      this.montoRecibido = 0;
+      this.cambio = 0;
+      this.tipoSeleccionado = 'productos';
+      this.searchTerm = '';
+      this.cargarItems();
+    },
+    error: (err) => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al procesar la venta. Por favor, inténtalo de nuevo.',
+        confirmButtonText: 'Cerrar'
+      });
+      console.error(err);
+    }
+  });
+}
 
 }

@@ -18,20 +18,27 @@
 <!-- Grid de productos/servicios -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
   <div *ngFor="let item of itemsFiltrados"
-       class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
-    <h3 class="text-lg font-semibold text-gray-800 mb-1">{{item.nombre}}</h3>
-    <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{item.descripcion}}</p>
+    class="bg-gray-50 rounded-xl p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:border-blue-400 border border-gray-100 relative group">
+
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-xl font-bold text-gray-800">{{item.nombre}}</h3>
+      <div class="text-blue-500">
+        <i class="fas fa-shopping-cart text-2xl"></i>
+      </div>
+    </div>
+    <p class="text-sm text-gray-600 mb-4 line-clamp-3">{{item.descripcion}}</p>
+
     <div class="flex items-center justify-between">
-      <span class="text-xl font-bold text-green-600">${{ getPrecio(item) | number:'1.2-2' }} MXN</span>
+      <span class="text-2xl font-extrabold text-blue-700">${{ getPrecio(item) | number:'1.2-2' }} MXN</span>
       <button (click)="agregarAlCarrito(item)"
-              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+        class="border border-blue-400 text-blue-600 px-4 py-2 rounded-full transition-all duration-300
+        hover:bg-blue-600 hover:text-white hover:border-transparent flex items-center gap-2 text-sm font-semibold">
         <i class="fas fa-cart-plus"></i>
         <span>Agregar</span>
       </button>
     </div>
   </div>
 </div>
-
 <!-- Panel de venta -->
 <div class="bg-white rounded-xl shadow-md overflow-hidden">
   <div class="bg-gray-800 text-white px-6 py-4">

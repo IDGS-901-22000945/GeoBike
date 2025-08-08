@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeoApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250801010705_AddImagenBase64ToProducto")]
-    partial class AddImagenBase64ToProducto
+    [Migration("20250808010703_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
